@@ -1,0 +1,238 @@
+---
+/**
+ * Interactive Hill-function explorer. Shows how the two parameters we would fit from dose–response
+ * data change a module's behaviour. Illustrative: the curve is the model, not measured data.
+ */
+const width = 640;
+const height = 300;
+const margin = { top: 16, right: 20, bottom: 46, left: 56 };
+const defaults = { k: 0.6, n: 2 };
+
+const xToPx = (x: number) => margin.left + (x / 2) * (width - margin.left - margin.right);
+const yToPx = (y: number) => height - margin.bottom - y * (height - margin.top - margin.bottom);
+
+function curve(k: number, n: number): string {
+  const steps = 80;
+  return Array.from({ length: steps + 1 }, (_, i) => {
+    const x = (i / steps) * 2;
+    const y = x ** n / (k ** n + x ** n);
+    return `${i === 0 ? 'M' : 'L'}${xToPx(x).toFixed(1)} ${yToPx(y).toFixed(1)}`;
+  }).join(' ');
+}
+
+const xTicks = [0, 0.5, 1, 1.5, 2];
+const yTicks = [0, 0.25, 0.5, 0.75, 1];
+---
+
+<div class="hill" data-hill>
+  <div class="hill__chart">
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      aria-label="Curve of module response against compound concentration, controlled by the sliders below"
+    >
+      {yTicks.map((t) => <line class="hill__grid" x1={margin.left} x2={width - margin.right} y1={yToPx(t)} y2={yToPx(t)} />)}
+      <line class="hill__axis" x1={margin.left} x2={margin.left} y1={margin.top} y2={height - margin.bottom}></line>
+      <line
+        class="hill__axis"
+        x1={margin.left}
+        x2={width - margin.right}
+        y1={height - margin.bottom}
+        y2={height - margin.bottom}></line>
+      {
+        yTicks.map((t) => (
+          <text class="hill__tick" x={margin.left - 10} y={yToPx(t) + 4} text-anchor="end">
+            {t}
+          </text>
+        ))
+      }
+      {
+        xTicks.map((t) => (
+          <text class="hill__tick" x={xToPx(t)} y={height - margin.bottom + 20} text-anchor="middle">
+            {t}
+          </text>
+        ))
+      }
+      <text class="hill__label" x={(margin.left + width - margin.right) / 2} y={height - 8} text-anchor="middle">
+        Compound concentration (relative units)
+      </text>
+      <text class="hill__label" transform={`rotate(-90 14 ${height / 2})`} x="14" y={height / 2} text-anchor="middle">
+        Response
+      </text>
+
+      <line class="hill__half" x1={margin.left} x2={width - margin.right} y1={yToPx(0.5)} y2={yToPx(0.5)}></line>
+      <line
+        class="hill__k"
+        data-hill-k-line
+        x1={xToPx(defaults.k)}
+        x2={xToPx(defaults.k)}
+        y1={yToPx(0.5)}
+        y2={height - margin.bottom}></line>
+      <path class="hill__curve" data-hill-curve d={curve(defaults.k, defaults.n)}></path>
+    </svg>
+  </div>
+
+  <div class="hill__controls">
+    <p class="hill__formula">
+      response = c<sup>n</sup> / (K<sup>n</sup> + c<sup>n</sup>)
+    </p>
+    <div class="hill__control">
+      <label for="hill-k">
+        K, the concentration giving half the maximum response: <output data-hill-k>{defaults.k.toFixed(2)}</output>
+      </label>
+      <input id="hill-k" type="range" min="0.1" max="1.6" step="0.05" value={defaults.k} data-hill-input="k" />
+      <p>Lower K means a more sensitive module: it responds to less of the compound.</p>
+    </div>
+    <div class="hill__control">
+      <label for="hill-n">
+        n, how switch-like the response is: <output data-hill-n>{defaults.n.toFixed(1)}</output>
+      </label>
+      <input id="hill-n" type="range" min="1" max="4" step="0.1" value={defaults.n} data-hill-input="n" />
+      <p>Higher n turns a gradual response into a sharp threshold, which is useful for a yes/no read-out and unhelpful for measuring how much.</p>
+    </div>
+    <p class="hill__note">
+      Illustrative model. Fitting K and n to real dose–response data is one of the first analyses we will run.
+    </p>
+  </div>
+</div>
+
+<style>
+  .hill {
+    display: grid;
+    gap: var(--sp-5);
+    margin: var(--sp-6) 0;
+    padding: var(--sp-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-figure);
+    background: var(--paper-raised);
+  }
+
+  @media (min-width: 56rem) {
+    .hill {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: var(--sp-6);
+      align-items: center;
+    }
+  }
+
+  .hill svg {
+    width: 100%;
+    height: auto;
+    font-family: var(--font-sans);
+  }
+
+  .hill__grid {
+    stroke: var(--rule);
+  }
+
+  .hill__axis {
+    stroke: var(--ink);
+    stroke-width: 1.5;
+  }
+
+  .hill__tick {
+    fill: var(--ink-2);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hill__label {
+    fill: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .hill__curve {
+    fill: none;
+    stroke: var(--metabolism-ink);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .hill__half,
+  .hill__k {
+    stroke: var(--ink-3);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+  }
+
+  .hill__controls {
+    font-family: var(--font-sans);
+  }
+
+  .hill__formula {
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hill__control {
+    margin-top: var(--sp-4);
+  }
+
+  .hill__control label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .hill__control output {
+    font-variant-numeric: tabular-nums;
+    color: var(--metabolism-ink);
+  }
+
+  .hill__control input {
+    width: 100%;
+    margin: var(--sp-2) 0;
+    accent-color: var(--metabolism-ink);
+  }
+
+  .hill__control p {
+    font-family: var(--font-serif);
+    font-size: 0.925rem;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .hill__note {
+    margin-top: var(--sp-4);
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+  }
+</style>
+
+<script>
+  const WIDTH = 640;
+  const HEIGHT = 300;
+  const MARGIN = { top: 16, right: 20, bottom: 46, left: 56 };
+  const xToPx = (x: number) => MARGIN.left + (x / 2) * (WIDTH - MARGIN.left - MARGIN.right);
+  const yToPx = (y: number) => HEIGHT - MARGIN.bottom - y * (HEIGHT - MARGIN.top - MARGIN.bottom);
+
+  document.querySelectorAll<HTMLElement>('[data-hill]').forEach((root) => {
+    const curve = root.querySelector<SVGPathElement>('[data-hill-curve]')!;
+    const kLine = root.querySelector<SVGLineElement>('[data-hill-k-line]')!;
+    const kOut = root.querySelector<HTMLOutputElement>('[data-hill-k]')!;
+    const nOut = root.querySelector<HTMLOutputElement>('[data-hill-n]')!;
+    const inputs = root.querySelectorAll<HTMLInputElement>('[data-hill-input]');
+
+    const draw = () => {
+      const k = Number(root.querySelector<HTMLInputElement>('[data-hill-input="k"]')!.value);
+      const n = Number(root.querySelector<HTMLInputElement>('[data-hill-input="n"]')!.value);
+      const steps = 80;
+      const d = Array.from({ length: steps + 1 }, (_, i) => {
+        const x = (i / steps) * 2;
+        const y = x ** n / (k ** n + x ** n);
+        return `${i === 0 ? 'M' : 'L'}${xToPx(x).toFixed(1)} ${yToPx(y).toFixed(1)}`;
+      }).join(' ');
+      curve.setAttribute('d', d);
+      kLine.setAttribute('x1', String(xToPx(k)));
+      kLine.setAttribute('x2', String(xToPx(k)));
+      kOut.textContent = k.toFixed(2);
+      nOut.textContent = n.toFixed(1);
+    };
+
+    inputs.forEach((input) => input.addEventListener('input', draw));
+    draw();
+  });
+</script>

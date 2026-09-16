@@ -1,0 +1,219 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import Section from '../components/content/Section.astro';
+import Table from '../components/content/Table.astro';
+import StatusPill from '../components/content/StatusPill.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import Note from '../components/content/Note.astro';
+import { judging, statusLabels } from '../data/judging';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'where-to-look', title: 'Where to look' },
+  { id: 'five-minutes', title: 'If you only have five minutes' },
+  { id: 'contribution', title: 'Contribution' },
+  { id: 'how-we-mark-evidence', title: 'How we mark evidence' },
+];
+
+const pillKind = { ready: 'met', partial: 'open', missing: 'unmet' } as const;
+---
+
+<PageLayout
+  title="Judging guide"
+  lede="A map from each iGEM criterion to the page that holds the evidence, with an honest status for each one."
+  toc={toc}
+>
+  <Section id="where-to-look" title="Where to look">
+    <p>
+      This table is our own mapping, not iGEM's. It exists so that an evaluator does not have to guess where something
+      lives, and so that we cannot quietly leave a gap unmarked.
+    </p>
+
+    <Table label="iGEM criteria and where the evidence is">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Criterion</th>
+            <th scope="col">What it covers</th>
+            <th scope="col">Where</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            judging.map((item) => (
+              <tr>
+                <th scope="row">{item.criterion}</th>
+                <td>{item.what}</td>
+                <td>
+                  <a href={href(item.where)}>{item.whereLabel}</a>
+                </td>
+                <td>
+                  <StatusPill kind={pillKind[item.status]} label={statusLabels[item.status]} />
+                  {item.note && <p class="status-note">{item.note}</p>}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </Table>
+
+    <Placeholder title="Check against the current iGEM handbook" where="src/data/judging.ts" compact>
+      Medal criteria and required pages change between years. Confirm this list against the iGEM 2026 judging handbook
+      and add any criterion we have missed.
+    </Placeholder>
+  </Section>
+
+  <Section id="five-minutes" title="If you only have five minutes">
+    <ol class="quick">
+      <li>
+        <a href={href('problem')}>The problem</a>, with the numbers behind it: lung cancer burden worldwide and in
+        Kazakhstan, and why CT screening is hard to reach.
+      </li>
+      <li>
+        <a href={href('/')}>The simulation on the home page</a>: one breath through the array, including a confounder
+        example that shows why a pattern is not a diagnosis.
+      </li>
+      <li>
+        <a href={href('synthetic-biology')}>The biology</a>: what a sensing module is, and which parts of it are still
+        undecided.
+      </li>
+      <li>
+        <a href={href('experiments')}>The experimental plan</a>: four hypotheses, each with the result that would prove
+        it wrong.
+      </li>
+      <li>
+        <a href={href('results')}>Results</a>: empty, deliberately, and marked as such.
+      </li>
+      <li>
+        <a href={href('safety-and-security')}>Limitations and safety</a>: what would make this fail, and what would be
+        required before clinical use.
+      </li>
+    </ol>
+  </Section>
+
+  <Section id="contribution" title="Contribution">
+    <p>
+      What we want to leave behind for other teams: a documented design for a cross-reactive biological sensing array,
+      an analysis pipeline written down before the data exists, and this wiki as an open template for presenting a
+      project honestly, including its gaps.
+    </p>
+    <Placeholder title="Contribution record" where="src/data/judging.ts">
+      <ul>
+        <li>Parts contributed to the registry, with characterisation data.</li>
+        <li>Protocols, analysis code and datasets published for reuse.</li>
+        <li>Anything another team could pick up directly, and where to find it.</li>
+      </ul>
+    </Placeholder>
+  </Section>
+
+  <Section id="how-we-mark-evidence" title="How we mark evidence">
+    <p>
+      The same markers appear on every page, so that the difference between a cited fact, our expectation and a gap is
+      visible at a glance.
+    </p>
+    <dl class="markers">
+      <div>
+        <dt>A superscript number</dt>
+        <dd>A claim supported by a published source. The number links to the full reference and means the same source on every page.</dd>
+      </div>
+      <div>
+        <dt>Hypothesis to test</dt>
+        <dd>Something we expect but have not shown. Written so that it can be proven wrong.</dd>
+      </div>
+      <div>
+        <dt>Limitation</dt>
+        <dd>A known weakness, confounder or open problem.</dd>
+      </div>
+      <div>
+        <dt>Content or data needed</dt>
+        <dd>A gap. It names what is missing and which file it belongs in, rather than being filled with something plausible.</dd>
+      </div>
+      <div>
+        <dt>Illustrative</dt>
+        <dd>A schematic or simulation used to explain an idea. Never measured data.</dd>
+      </div>
+    </dl>
+
+    <Note kind="context" title="Why an empty Results page">
+      <p>
+        A figure that looks like evidence and is not is worse than no figure. The chart components on{' '}
+        <a href={href('results')}>Results</a> are built and tested, and they render real data the moment it is added.
+      </p>
+    </Note>
+  </Section>
+</PageLayout>
+
+<style>
+  .status-note {
+    margin-top: var(--sp-2);
+    font-size: var(--text-xs);
+    line-height: 1.45;
+    color: var(--ink-2);
+    max-width: 30ch;
+  }
+
+  .quick {
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: quick;
+    border-top: 1px solid var(--rule);
+  }
+
+  .quick li {
+    counter-increment: quick;
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: var(--sp-3);
+    padding-block: var(--sp-4);
+    border-bottom: 1px solid var(--rule);
+    max-width: 72ch;
+  }
+
+  .quick li::before {
+    content: counter(quick);
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 650;
+  }
+
+  .markers {
+    margin: var(--sp-6) 0;
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .markers div {
+    display: grid;
+    gap: var(--sp-2);
+    padding-block: var(--sp-4);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  @media (min-width: 46rem) {
+    .markers div {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      gap: var(--sp-5);
+    }
+  }
+
+  .markers dt {
+    font-family: var(--font-sans);
+    font-weight: 650;
+  }
+
+  .markers dd {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-2);
+  }
+</style>

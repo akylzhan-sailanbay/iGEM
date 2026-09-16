@@ -1,0 +1,157 @@
+---
+/**
+ * The steps of a lung cancer screening pathway, and where a breath-based triage step would sit.
+ * Steps are data so the same component can show today's pathway and the proposed one.
+ */
+interface Step {
+  title: string;
+  detail: string;
+  /** Resources this step depends on */
+  needs?: string;
+  proposed?: boolean;
+}
+
+interface Props {
+  steps: Step[];
+  label: string;
+}
+const { steps, label } = Astro.props;
+---
+
+<ol class="pathway" aria-label={label}>
+  {
+    steps.map((step, i) => (
+      <li class:list={['pathway__step', { 'is-proposed': step.proposed }]}>
+        <span class="pathway__node" aria-hidden="true">
+          {i + 1}
+        </span>
+        <div class="pathway__text">
+          {step.proposed && <p class="pathway__tag">Proposed by OncoNose, not in use today</p>}
+          <h3>{step.title}</h3>
+          <p>{step.detail}</p>
+          {step.needs && (
+            <p class="pathway__needs">
+              <span>Depends on:</span> {step.needs}
+            </p>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .pathway {
+    --node: 2.25rem;
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    font-family: var(--font-sans);
+  }
+
+  .pathway__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--node) minmax(0, 1fr);
+    gap: var(--sp-4);
+    padding-bottom: var(--sp-5);
+  }
+
+  .pathway__step::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--node) / 2 - 1px);
+    top: var(--node);
+    bottom: 0;
+    width: 2px;
+    background: var(--ink);
+  }
+
+  .pathway__step:last-child::before {
+    display: none;
+  }
+
+  .pathway__node {
+    display: grid;
+    place-items: center;
+    width: var(--node);
+    height: var(--node);
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 650;
+    font-size: 0.95rem;
+  }
+
+  .is-proposed .pathway__node {
+    background: var(--paper);
+    color: var(--ink);
+    border: 2px dashed var(--ink);
+  }
+
+  .pathway__text h3 {
+    font-size: 1.05rem;
+    padding-top: 0.35rem;
+  }
+
+  .pathway__text p {
+    margin-top: var(--sp-1);
+    font-family: var(--font-serif);
+    font-size: 0.975rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  p.pathway__tag {
+    margin: 0 0 0.1rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--air-ink);
+    padding-top: 0.2rem;
+  }
+
+  .is-proposed h3 {
+    padding-top: 0;
+  }
+
+  p.pathway__needs {
+    margin-top: var(--sp-2);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--ink);
+  }
+
+  .pathway__needs span {
+    color: var(--ink-3);
+  }
+
+  @media (min-width: 56rem) {
+    .pathway {
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: var(--sp-4);
+    }
+
+    .pathway__step {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: var(--node) auto;
+      padding-bottom: 0;
+    }
+
+    .pathway__step::before {
+      left: var(--node);
+      right: calc(-1 * var(--sp-4));
+      top: calc(var(--node) / 2 - 1px);
+      bottom: auto;
+      width: auto;
+      height: 2px;
+    }
+
+    .pathway__step.is-proposed::before,
+    .pathway__step:has(+ .is-proposed)::before {
+      background: repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 10px);
+    }
+  }
+</style>

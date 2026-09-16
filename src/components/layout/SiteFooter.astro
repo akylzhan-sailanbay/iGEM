@@ -1,0 +1,185 @@
+---
+import LogoMark from './LogoMark.astro';
+import { chapters, supportPages } from '../../data/chapters';
+import { site } from '../../data/site';
+import { href } from '../../lib/paths';
+
+const year = site.year;
+---
+
+<footer class="site-footer on-dark">
+  <div class="container site-footer__grid">
+    <div class="site-footer__brand">
+      <a class="site-footer__logo" href={href('/')}>
+        <LogoMark size={36} />
+        <span>OncoNose</span>
+      </a>
+      <p>{site.summary}</p>
+      <p class="site-footer__team">
+        {
+          site.teamName ? (
+            <>iGEM {year} team {site.teamName}{site.institution ? `, ${site.institution}` : ''}.</>
+          ) : (
+            <span class="site-footer__todo">Team name and institution not set yet (src/data/site.ts).</span>
+          )
+        }
+      </p>
+    </div>
+
+    <nav class="site-footer__nav" aria-label="Footer">
+      <div>
+        <h2>The story, in order</h2>
+        <ol>
+          {chapters.map((c) => (
+            <li>
+              <a href={href(c.slug)}>{c.nav}</a>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div>
+        <h2>For judges and readers</h2>
+        <ul role="list">
+          {supportPages.map((p) => (
+            <li>
+              <a href={href(p.slug)}>{p.nav}</a>
+            </li>
+          ))}
+          <li>
+            <a href={site.links.igem} rel="noopener">iGEM</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+
+  <div class="container site-footer__legal">
+    <p>
+      © {year} OncoNose. Content on this site is licensed under a{' '}
+      <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">Creative Commons Attribution 4.0 International license</a>.
+      {
+        site.links.repository ? (
+          <>
+            The source code is available at <a href={site.links.repository}>{site.links.repository.replace(/^https?:\/\//, '')}</a>.
+          </>
+        ) : null
+      }
+    </p>
+    <p>OncoNose is a research project and screening concept. Nothing on this site is medical advice or a validated diagnostic.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--sp-10);
+    background: var(--darkfield);
+    color: var(--on-dark);
+    font-family: var(--font-sans);
+    padding-block: var(--sp-8) var(--sp-6);
+  }
+
+  .site-footer a {
+    color: var(--on-dark);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    gap: var(--sp-7);
+  }
+
+  @media (min-width: 52rem) {
+    .site-footer__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: var(--sp-8);
+    }
+  }
+
+  .site-footer__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    text-decoration: none;
+    font-size: 1.75rem;
+    font-weight: 720;
+    font-stretch: 120%;
+    letter-spacing: -0.02em;
+    color: var(--on-dark);
+  }
+
+  .site-footer__brand p {
+    margin-top: var(--sp-4);
+    max-width: 44ch;
+    color: var(--on-dark-2);
+    line-height: 1.55;
+  }
+
+  .site-footer__todo {
+    color: var(--oxidative-glow);
+  }
+
+  .site-footer__nav {
+    display: grid;
+    gap: var(--sp-6);
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  }
+
+  .site-footer h2 {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--on-dark-3);
+    letter-spacing: 0;
+    margin-bottom: var(--sp-3);
+  }
+
+  .site-footer ol,
+  .site-footer ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer ol {
+    counter-reset: chapter;
+  }
+
+  .site-footer ol li {
+    counter-increment: chapter;
+  }
+
+  .site-footer ol li::before {
+    content: counter(chapter);
+    display: inline-block;
+    width: 1.6rem;
+    color: var(--on-dark-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .site-footer li + li {
+    margin-top: 0.35rem;
+  }
+
+  .site-footer__nav a {
+    text-decoration: none;
+    display: inline-block;
+    padding-block: 0.15rem;
+  }
+
+  .site-footer__nav a:hover {
+    text-decoration: underline;
+  }
+
+  .site-footer__legal {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--darkfield-line);
+    display: grid;
+    gap: var(--sp-2);
+    font-size: var(--text-xs);
+    color: var(--on-dark-3);
+    line-height: 1.5;
+  }
+
+  .site-footer__legal p {
+    max-width: 90ch;
+  }
+</style>

@@ -1,0 +1,158 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import Section from '../components/content/Section.astro';
+import { references, referenceLink, referenceNumber, type ReferenceTopic } from '../data/references';
+import { chapters, supportPages } from '../data/chapters';
+import { href } from '../lib/paths';
+
+// Work out which pages cite each source by scanning the page sources at build time,
+// so this list cannot drift away from the pages themselves.
+const sources = import.meta.glob('./*.astro', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const pageTitles = new Map<string, string>([
+  ...chapters.map((c) => [c.slug, c.nav] as [string, string]),
+  ...supportPages.map((p) => [p.slug, p.nav] as [string, string]),
+]);
+
+function citedOn(id: string) {
+  return Object.entries(sources)
+    .map(([path, source]) => ({ slug: path.replace('./', '').replace('.astro', ''), source }))
+    .filter(
+      ({ slug, source }) =>
+        slug !== 'references' && pageTitles.has(slug) && (source.includes(`'${id}'`) || source.includes(`"${id}"`)),
+    )
+    .map(({ slug }) => ({ slug, title: pageTitles.get(slug)! }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
+
+const topics: ReferenceTopic[] = [
+  'Disease burden',
+  'Screening',
+  'Breath analysis',
+  'Biological sensing',
+  'Screening ethics',
+  'Biosafety',
+];
+
+const toc = topics
+  .filter((topic) => references.some((r) => r.topic === topic))
+  .map((topic) => ({ id: topic.toLowerCase().replace(/[^a-z]+/g, '-'), title: topic }));
+---
+
+<PageLayout
+  title="References"
+  lede="Every source cited on this site, with what it supports and where it is used. Numbers are the same on every page."
+  toc={toc}
+>
+  {
+    topics.map((topic) => {
+      const items = references.filter((r) => r.topic === topic);
+      if (!items.length) return null;
+      return (
+        <Section id={topic.toLowerCase().replace(/[^a-z]+/g, '-')} title={topic}>
+          <ol class="refs">
+            {items.map((ref) => {
+              const link = referenceLink(ref);
+              const pages = citedOn(ref.id);
+              return (
+                <li class="ref" id={`ref-${ref.id}`}>
+                  <span class="ref__n tabular">{referenceNumber(ref.id)}</span>
+                  <div class="ref__body">
+                    <p class="ref__citation">
+                      {ref.authors} {ref.title}. <em>{ref.venue}</em>. {ref.year}
+                      {ref.details ? `;${ref.details}` : ''}.
+                    </p>
+                    <p class="ref__supports">{ref.supports}</p>
+                    <p class="ref__meta">
+                      {link && (
+                        <a class="ref__link" href={link} rel="noopener">
+                          {ref.doi ? `doi:${ref.doi}` : 'Open source'}
+                        </a>
+                      )}
+                      {pages.length > 0 && (
+                        <span class="ref__cited">
+                          Cited on{' '}
+                          {pages.map((page, i) => (
+                            <>
+                              {i > 0 && ', '}
+                              <a href={href(page.slug)}>{page.title}</a>
+                            </>
+                          ))}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </Section>
+      );
+    })
+  }
+</PageLayout>
+
+<style>
+  .refs {
+    margin: var(--sp-5) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .ref {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: var(--sp-2);
+    padding-block: var(--sp-5);
+    border-bottom: 1px solid var(--rule);
+    scroll-margin-top: calc(var(--header-h) + var(--sp-6));
+  }
+
+  .ref:target {
+    background: var(--paper-sunk);
+    box-shadow: inset 3px 0 0 var(--air-ink);
+    padding-inline: var(--sp-4);
+    margin-inline: calc(-1 * var(--sp-4));
+  }
+
+  .ref__n {
+    font-family: var(--font-sans);
+    font-weight: 650;
+    color: var(--ink-2);
+  }
+
+  .ref__citation {
+    max-width: 78ch;
+    line-height: 1.5;
+  }
+
+  .ref__supports {
+    margin-top: var(--sp-2);
+    max-width: 72ch;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .ref__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-5);
+    margin-top: var(--sp-3);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+  }
+
+  .ref__link {
+    overflow-wrap: anywhere;
+  }
+
+  .ref__cited {
+    color: var(--ink-3);
+  }
+
+  .ref__cited a {
+    color: var(--ink-2);
+  }
+</style>

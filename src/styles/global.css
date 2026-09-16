@@ -1,0 +1,362 @@
+@import './tokens.css';
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + var(--sp-5));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 640;
+  line-height: var(--leading-tight);
+  text-wrap: balance;
+  letter-spacing: -0.012em;
+}
+
+h1 {
+  font-size: var(--text-h1);
+  font-stretch: 108%;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: var(--text-h2);
+  font-stretch: 104%;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-size: var(--text-h3);
+  line-height: var(--leading-snug);
+}
+
+p,
+ul,
+ol,
+dl,
+figure,
+blockquote {
+  margin: 0;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 0.07em;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  transition: text-decoration-color var(--dur-fast) linear;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.on-dark :focus-visible,
+.on-dark:focus-visible {
+  outline-color: var(--air-glow);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--air) 45%, transparent);
+}
+
+em,
+i {
+  font-style: italic;
+}
+
+strong,
+b {
+  font-weight: 650;
+}
+
+abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+sup,
+sub {
+  line-height: 0;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--sp-7) 0;
+}
+
+/* ---------- Utilities ---------- */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.sans {
+  font-family: var(--font-sans);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--sp-4);
+  top: -100px;
+  z-index: 100;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  border-radius: var(--r-control);
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: var(--sp-3);
+}
+
+/* ---------- Prose ---------- */
+.prose > * + * {
+  margin-top: var(--sp-5);
+}
+
+.prose > :is(p, ul, ol, blockquote, h3, h4) {
+  max-width: var(--measure);
+}
+
+.prose > h3 {
+  margin-top: var(--sp-7);
+}
+
+.prose > h3 + * {
+  margin-top: var(--sp-3);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.25em;
+}
+
+.prose li + li {
+  margin-top: var(--sp-2);
+}
+
+.prose li::marker {
+  color: var(--ink-3);
+}
+
+.lede {
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: 60ch;
+}
+
+.small {
+  font-size: var(--text-sm);
+}
+
+.meta {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+
+/* ---------- Buttons ---------- */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 2.875rem;
+  padding: 0.625rem 1.125rem;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-size: 0.975rem;
+  font-weight: 600;
+  line-height: 1.1;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) linear,
+    color var(--dur-fast) linear,
+    border-color var(--dur-fast) linear;
+}
+
+.button:hover {
+  background: var(--darkfield-2);
+  border-color: var(--darkfield-2);
+}
+
+.button--quiet {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+.button--quiet:hover {
+  background: var(--paper-raised);
+  border-color: var(--ink);
+}
+
+.button svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+}
+
+/* ---------- Tables ---------- */
+.table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border-top: 1.5px solid var(--ink);
+}
+
+.table-scroll:focus-visible {
+  outline-offset: 4px;
+}
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+table.data caption {
+  text-align: left;
+  padding-bottom: var(--sp-3);
+  font-weight: 600;
+}
+
+table.data th,
+table.data td {
+  /* A floor on column width: wide tables scroll rather than squeezing into unreadable columns */
+  min-width: 7.5rem;
+  text-align: left;
+  vertical-align: top;
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+table.data thead th {
+  font-weight: 600;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+table.data tbody th {
+  font-weight: 600;
+}
+
+/* ---------- Signal family helpers ---------- */
+[data-family='metabolism'] {
+  --family: var(--metabolism);
+  --family-ink: var(--metabolism-ink);
+  --family-glow: var(--metabolism-glow);
+  --family-tint: var(--metabolism-tint);
+}
+
+[data-family='oxidative'] {
+  --family: var(--oxidative);
+  --family-ink: var(--oxidative-ink);
+  --family-glow: var(--oxidative-glow);
+  --family-tint: var(--oxidative-tint);
+}
+
+[data-family='inflammation'] {
+  --family: var(--inflammation);
+  --family-ink: var(--inflammation-ink);
+  --family-glow: var(--inflammation-glow);
+  --family-tint: var(--inflammation-tint);
+}

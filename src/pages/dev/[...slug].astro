@@ -1,0 +1,192 @@
+---
+/**
+ * Component gallery. Built only when running `npm run dev`, never in a production build,
+ * so the example numbers below can never be mistaken for results.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/content/Section.astro';
+import Note from '../../components/content/Note.astro';
+import Placeholder from '../../components/content/Placeholder.astro';
+import TechDetail from '../../components/content/TechDetail.astro';
+import Figure from '../../components/content/Figure.astro';
+import FigureStrip from '../../components/content/FigureStrip.astro';
+import StatusPill from '../../components/content/StatusPill.astro';
+import ChartFrame from '../../components/charts/ChartFrame.astro';
+import LineChart from '../../components/charts/LineChart.astro';
+import ResponseHeatmap from '../../components/charts/ResponseHeatmap.astro';
+import SbolConstruct from '../../components/science/SbolConstruct.astro';
+
+export function getStaticPaths() {
+  // Development only: no pages are generated for a production build.
+  if (import.meta.env.PROD) return [];
+  return [{ params: { slug: 'components' } }];
+}
+
+const exampleSeries = [
+  {
+    label: 'Example module A',
+    family: 'metabolism' as const,
+    points: [
+      { x: 0.1, y: 0.04, error: 0.02 },
+      { x: 0.3, y: 0.11, error: 0.03 },
+      { x: 1, y: 0.38, error: 0.05 },
+      { x: 3, y: 0.71, error: 0.06 },
+      { x: 10, y: 0.86, error: 0.04 },
+    ],
+  },
+  {
+    label: 'Example module B',
+    family: 'oxidative' as const,
+    points: [
+      { x: 0.1, y: 0.02, error: 0.01 },
+      { x: 0.3, y: 0.05, error: 0.02 },
+      { x: 1, y: 0.16, error: 0.03 },
+      { x: 3, y: 0.42, error: 0.05 },
+      { x: 10, y: 0.63, error: 0.05 },
+    ],
+  },
+];
+
+const exampleMatrix = {
+  rows: ['M1', 'M2', 'M3'],
+  cols: ['Compound 1', 'Compound 2', 'Compound 3'],
+  values: [
+    [0.82, 0.21, 0.08],
+    [0.64, 0.35, null],
+    [0.12, 0.77, 0.44],
+  ] as (number | null)[][],
+};
+---
+
+<BaseLayout title="Component gallery" description="Development-only gallery of site components." noindex>
+  <div class="container dev">
+    <header class="dev__head">
+      <h1>Component gallery</h1>
+      <p class="lede">
+        Every reusable piece of the site, shown with example values. This page exists only in development and is never
+        included in a production build.
+      </p>
+      <p class="dev__warning">
+        The numbers on this page are made up to exercise the components. They are not experimental results.
+      </p>
+    </header>
+
+    <Section id="evidence" title="Evidence markers">
+      <Note kind="hypothesis" title="A hypothesis">
+        <p>Something we expect but have not shown.</p>
+      </Note>
+      <Note kind="limitation" title="A limitation">
+        <p>A known weakness or open problem.</p>
+      </Note>
+      <Note kind="definition" title="A definition">
+        <p>A term explained for non-specialists.</p>
+      </Note>
+      <Note kind="context">
+        <p>Background that helps interpret the surrounding text.</p>
+      </Note>
+      <Placeholder title="A missing piece of content" where="src/data/example.ts">
+        <ul>
+          <li>What is missing, in specific terms.</li>
+        </ul>
+      </Placeholder>
+      <p>
+        Status pills: <StatusPill kind="met" /> <StatusPill kind="open" /> <StatusPill kind="unmet" />{' '}
+        <StatusPill kind="planned" />
+      </p>
+      <TechDetail summary="A technical detail, collapsed by default">
+        <p>Specialist detail that a general reader can skip.</p>
+      </TechDetail>
+    </Section>
+
+    <Section id="figures" title="Figures and numbers">
+      <FigureStrip
+        items={[
+          { value: '2.48', unit: 'million', label: 'Example figure with a source', refId: 'ji2025' },
+          { value: '47.5', unit: '%', label: 'Example percentage', refId: 'avizova2026' },
+          { value: '167', unit: 'days', label: 'Example duration', refId: 'avizova2026' },
+        ]}
+      />
+      <Figure caption="A figure caption describing what the reader is looking at." status="illustrative">
+        <div style="padding: 2rem; text-align: center; color: var(--ink-3); font-family: var(--font-sans)">
+          Figure content goes here
+        </div>
+      </Figure>
+    </Section>
+
+    <Section id="charts" title="Charts with data">
+      <ChartFrame
+        title="Dose–response, example data"
+        caption="Rendered from the same component used on the Results page, with example values."
+        hasData
+        illustrative
+      >
+        <LineChart series={exampleSeries} xLabel="Concentration (µM)" yLabel="Normalised response" xScaleType="log" />
+      </ChartFrame>
+
+      <ChartFrame
+        title="Response matrix, example data"
+        caption="Missing measurements are drawn as an explicit gap rather than as zero."
+        hasData
+        illustrative
+      >
+        <ResponseHeatmap
+          rowLabels={exampleMatrix.rows}
+          colLabels={exampleMatrix.cols}
+          values={exampleMatrix.values}
+          rowTitle="Modules"
+          colTitle="Compounds"
+        />
+      </ChartFrame>
+
+      <ChartFrame
+        title="A chart with no data yet"
+        caption="This is what every figure on the Results page looks like until its dataset exists."
+        hasData={false}
+        awaiting="Dose–response measurements for each module."
+        where="src/data/results.ts"
+      />
+    </Section>
+
+    <Section id="constructs" title="Genetic constructs">
+      <SbolConstruct
+        label="Example construct"
+        parts={[
+          { type: 'promoter', label: 'Promoter' },
+          { type: 'rbs', label: 'RBS' },
+          { type: 'cds', label: 'Reporter', family: 'metabolism' },
+          { type: 'terminator', label: 'Terminator' },
+        ]}
+      >
+        Parts that are still undecided are drawn dashed, as on the Synthetic biology page.
+      </SbolConstruct>
+    </Section>
+  </div>
+</BaseLayout>
+
+<style>
+  .dev {
+    padding-block: var(--sp-8);
+  }
+
+  .dev__head {
+    padding-bottom: var(--sp-7);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .dev__head .lede {
+    margin-top: var(--sp-4);
+  }
+
+  .dev__warning {
+    margin-top: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+    border: 1.5px dashed var(--placeholder-edge);
+    border-radius: var(--r-figure);
+    background: var(--placeholder-bg);
+    color: var(--placeholder-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    max-width: var(--measure);
+  }
+</style>

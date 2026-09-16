@@ -1,0 +1,16 @@
+# Deployment for the official iGEM wiki (gitlab.igem.org).
+# iGEM serves the site from https://2026.igem.wiki/<team-slug>/, so the build needs that base path,
+# and GitLab Pages publishes whatever ends up in `public/`.
+image: node:22
+
+pages:
+  stage: deploy
+  script:
+    - npm ci
+    - ONCONOSE_BASE=/onconose/ ONCONOSE_SITE=https://2026.igem.wiki npm run build
+    - rm -rf public && mv dist public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

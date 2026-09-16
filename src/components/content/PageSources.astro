@@ -1,0 +1,81 @@
+---
+import { getReference, referenceLink, referenceNumber } from '../../data/references';
+import { href } from '../../lib/paths';
+
+interface Props {
+  ids: string[];
+}
+const { ids } = Astro.props;
+const items = [...new Set(ids)]
+  .map((id) => ({ ref: getReference(id), n: referenceNumber(id) }))
+  .sort((a, b) => a.n - b.n);
+---
+
+<section class="sources" id="sources" aria-labelledby="sources-title">
+  <h2 id="sources-title">Sources</h2>
+  <p class="meta">
+    Numbers match the <a href={href('references')}>full reference list</a>, so a number means the same source on every page.
+  </p>
+  <ol class="sources__list" role="list">
+    {
+      items.map(({ ref, n }) => {
+        const link = referenceLink(ref);
+        return (
+          <li>
+            <span class="sources__n">{n}</span>
+            <span>
+              {ref.authors} {ref.title}. <em>{ref.venue}</em>. {ref.year}
+              {ref.details ? `;${ref.details}` : ''}.{' '}
+              {link && (
+                <a href={link} rel="noopener">
+                  {ref.doi ? `doi:${ref.doi}` : 'Source'}
+                </a>
+              )}
+            </span>
+          </li>
+        );
+      })
+    }
+  </ol>
+</section>
+
+<style>
+  .sources {
+    padding-top: var(--sp-7);
+    border-top: 1.5px solid var(--ink);
+  }
+
+  .sources h2 {
+    font-size: var(--text-h3);
+  }
+
+  .sources .meta {
+    margin-top: var(--sp-2);
+  }
+
+  .sources__list {
+    margin: var(--sp-5) 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--sp-3);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    max-width: 80ch;
+  }
+
+  .sources__list li {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .sources__n {
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+  }
+
+  .sources a {
+    overflow-wrap: anywhere;
+  }
+</style>

@@ -1,0 +1,172 @@
+---
+export interface TocItem {
+  id: string;
+  title: string;
+}
+
+interface Props {
+  items: TocItem[];
+}
+const { items } = Astro.props;
+---
+
+<div class="toc" data-toc>
+  <details class="toc__mobile">
+    <summary>On this page</summary>
+    <ol>
+      {
+        items.map((item) => (
+          <li>
+            <a href={`#${item.id}`}>{item.title}</a>
+          </li>
+        ))
+      }
+    </ol>
+  </details>
+
+  <nav class="toc__desktop" aria-label="On this page">
+    <p class="toc__title">On this page</p>
+    <ol>
+      {
+        items.map((item) => (
+          <li>
+            <a href={`#${item.id}`} data-toc-link={item.id}>
+              {item.title}
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </nav>
+</div>
+
+<style>
+  .toc {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.35;
+  }
+
+  .toc ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .toc__mobile {
+    border-block: 1px solid var(--rule);
+  }
+
+  .toc__mobile summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .toc__mobile summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .toc__mobile summary::after {
+    content: '';
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 1.6px solid currentColor;
+    border-bottom: 1.6px solid currentColor;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .toc__mobile[open] summary::after {
+    transform: rotate(225deg);
+  }
+
+  .toc__mobile ol {
+    padding-bottom: var(--sp-3);
+  }
+
+  .toc__mobile a {
+    display: block;
+    padding: 0.55rem 0;
+    text-decoration: none;
+  }
+
+  .toc__desktop {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .toc__mobile {
+      display: none;
+    }
+
+    .toc__desktop {
+      display: block;
+      position: sticky;
+      top: calc(var(--header-h) + var(--sp-6));
+    }
+  }
+
+  .toc__title {
+    font-weight: 600;
+    color: var(--ink-2);
+    margin-bottom: var(--sp-3);
+  }
+
+  .toc__desktop ol {
+    border-left: 1.5px solid var(--rule);
+  }
+
+  .toc__desktop a {
+    display: block;
+    margin-left: -1.5px;
+    padding: 0.4rem 0 0.4rem var(--sp-4);
+    border-left: 1.5px solid transparent;
+    color: var(--ink-2);
+    text-decoration: none;
+    transition:
+      color var(--dur-fast) linear,
+      border-color var(--dur-fast) linear;
+  }
+
+  .toc__desktop a:hover {
+    color: var(--ink);
+  }
+
+  .toc__desktop a[aria-current='true'] {
+    color: var(--ink);
+    font-weight: 600;
+    border-left-color: var(--ink);
+  }
+</style>
+
+<script>
+  // Highlight the section currently being read
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+  const sections = links
+    .map((link) => document.getElementById(link.dataset.tocLink!))
+    .filter((el): el is HTMLElement => el !== null);
+
+  if (sections.length && 'IntersectionObserver' in window) {
+    const visible = new Map<string, boolean>();
+    const setCurrent = () => {
+      const firstVisible = sections.find((s) => visible.get(s.id));
+      if (!firstVisible) return;
+      links.forEach((link) =>
+        link.setAttribute('aria-current', String(link.dataset.tocLink === firstVisible.id)),
+      );
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => visible.set(entry.target.id, entry.isIntersecting));
+        setCurrent();
+      },
+      { rootMargin: '-20% 0px -55% 0px' },
+    );
+    sections.forEach((section) => observer.observe(section));
+  }
+</script>

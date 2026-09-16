@@ -1,0 +1,203 @@
+---
+import ChapterLayout from '../layouts/ChapterLayout.astro';
+import Section from '../components/content/Section.astro';
+import Cite from '../components/content/Cite.astro';
+import Note from '../components/content/Note.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import TechDetail from '../components/content/TechDetail.astro';
+import Table from '../components/content/Table.astro';
+import SbolConstruct from '../components/science/SbolConstruct.astro';
+import ModuleExplorer from '../components/science/ModuleExplorer.astro';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'anatomy', title: 'Anatomy of a sensing module' },
+  { id: 'the-array', title: 'Six modules, three families' },
+  { id: 'design-choices', title: 'Design choices we are weighing' },
+  { id: 'modularity', title: 'Why modularity matters here' },
+  { id: 'parts', title: 'Parts' },
+];
+
+const refs = ['radhika2007', 'hakim2012'];
+---
+
+<ChapterLayout
+  slug="synthetic-biology"
+  toc={toc}
+  refs={refs}
+  brief={[
+    'Every sensing module has the same three jobs: sense a compound, process the signal, report it in a way we can measure.',
+    'Modules share an interface, so a sensing element can be swapped without redesigning the rest of the array.',
+    'The specific parts are not fixed yet. Undecided parts are drawn with dashed outlines throughout this chapter.',
+  ]}
+>
+  <Section
+    id="anatomy"
+    title="Anatomy of a sensing module"
+    lead="A module is a small genetic circuit inside a host cell. It reads chemistry and writes light."
+  >
+    <p>
+      The sensing part of the circuit is expressed steadily, so the cell is always ready. When the target compound is
+      present, it changes the activity of a responsive promoter, which drives production of a reporter protein. The
+      amount of reporter is what the instrument measures.
+    </p>
+
+    <SbolConstruct
+      label="Sensing device: constitutive promoter, ribosome binding site, sensor coding sequence, terminator"
+      parts={[
+        { type: 'promoter', label: 'Constitutive promoter' },
+        { type: 'rbs', label: 'RBS' },
+        { type: 'cds', label: 'Sensor protein (to be chosen)', placeholder: true },
+        { type: 'terminator', label: 'Terminator' },
+      ]}
+    >
+      Sensing device. The sensor protein is produced continuously so that the cell can respond at any time.
+    </SbolConstruct>
+
+    <SbolConstruct
+      label="Reporting device: compound-responsive promoter, ribosome binding site, reporter coding sequence, terminator"
+      parts={[
+        { type: 'promoter', label: 'Responsive promoter (to be chosen)', placeholder: true },
+        { type: 'rbs', label: 'RBS' },
+        { type: 'cds', label: 'Reporter (to be chosen)', placeholder: true },
+        { type: 'terminator', label: 'Terminator' },
+      ]}
+    >
+      Reporting device. The responsive promoter is the point where chemistry becomes gene expression, and the reporter
+      is what the reader sees.
+    </SbolConstruct>
+
+    <Note kind="context" title="Sense, process, report">
+      <p>
+        Splitting a module into these three jobs is what makes the array extensible. Change the sensor and the
+        responsive promoter, keep the reporter and the host, and the rest of the system, including the analysis, does
+        not have to change.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="the-array" title="Six modules, three families">
+    <p>
+      The array is designed around the three signal families described in{' '}
+      <a href={href('solution#three-families')}>Solution</a>: tumour metabolism, oxidative stress and chronic
+      inflammation.<Cite id="hakim2012" /> Each module is aimed mostly at one family, with deliberate cross-reactivity to
+      the others, because a set of overlapping responses carries more information than a set of narrow ones.
+    </p>
+
+    <ModuleExplorer />
+
+    <Placeholder title="Real module definitions" where="src/data/signals.ts">
+      <ul>
+        <li>Target compound or compound class for each module.</li>
+        <li>Sensing element: transcription factor, receptor or enzyme, with its source organism.</li>
+        <li>Responsive promoter and reporter, with registry part numbers where they exist.</li>
+        <li>Host strain, and why it was chosen.</li>
+      </ul>
+    </Placeholder>
+  </Section>
+
+  <Section id="design-choices" title="Design choices we are weighing">
+    <p>
+      These are the decisions in front of us. Each one is written as options with trade-offs rather than as a settled
+      answer, because they are not settled.
+    </p>
+
+    <TechDetail summary="Sensing element: transcription-factor biosensor, receptor, or enzyme-coupled">
+      <p>
+        <strong>Transcription-factor biosensors</strong> use a regulator that binds a small molecule and changes
+        transcription at its promoter. They are well established in bacteria and give a direct route from compound to
+        gene expression, but each one is specific to the compounds its regulator evolved to bind.
+      </p>
+      <p>
+        <strong>Olfactory receptors</strong> detect volatile compounds in animals. A yeast strain carrying the main
+        components of the mammalian olfactory signalling pathway, coupled to a fluorescent reporter, has been used to
+        screen receptors against a volatile target.<Cite id="radhika2007" /> That is a precedent for volatile sensing in
+        engineered cells, though such systems are harder to build and tune than a transcription-factor circuit.
+      </p>
+      <p>
+        <strong>Enzyme-coupled sensing</strong> converts a compound into something a cell already senses. It adds a step
+        but can extend the range of detectable compounds.
+      </p>
+    </TechDetail>
+
+    <TechDetail summary="Reporter: fluorescent protein, luciferase, or colour">
+      <p>
+        A <strong>fluorescent protein</strong> is easy to read with simple optics and gives a continuous signal, but
+        needs an excitation source and has a maturation delay. <strong>Luciferase</strong> gives a strong signal with a
+        very low background and no excitation light, at the cost of adding a substrate. A{' '}
+        <strong>colorimetric output</strong> can be read by eye, which matters for low-resource settings, but is harder
+        to quantify precisely.
+      </p>
+    </TechDetail>
+
+    <TechDetail summary="Host: bacteria, yeast, or a cell-free system">
+      <p>
+        <strong><i>Escherichia coli</i></strong> grows fast and has the largest library of characterised parts.
+        <strong><i>Saccharomyces cerevisiae</i></strong> supports eukaryotic membrane proteins such as olfactory
+        receptors, which matters if we go that route.<Cite id="radhika2007" /> A <strong>cell-free system</strong>
+        contains no living organism at all, which simplifies biosafety and shelf life, but reagents cost more and the
+        response is short-lived.
+      </p>
+      <p>
+        The host choice is also a safety choice, and is discussed in <a href={href('safety-and-security')}>Safety and ethics</a>.
+      </p>
+    </TechDetail>
+  </Section>
+
+  <Section id="modularity" title="Why modularity matters here">
+    <p>
+      An array is only as extensible as its interface. We are designing so that every module shares the same host, the
+      same reporter and the same read-out geometry, and differs only in its sensing element and responsive promoter.
+      Two consequences follow: a new module can join the array without changing the reader or the analysis, and a module
+      that fails characterisation can be removed without invalidating the rest.
+    </p>
+
+    <Table label="What is shared and what varies between modules">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Layer</th>
+            <th scope="col">Shared across the array</th>
+            <th scope="col">Different per module</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Host</th>
+            <td>Same strain and growth conditions</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <th scope="row">Sensing</th>
+            <td>—</td>
+            <td>Sensor protein and responsive promoter</td>
+          </tr>
+          <tr>
+            <th scope="row">Reporting</th>
+            <td>Same reporter and measurement settings</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <th scope="row">Analysis</th>
+            <td>Same normalisation and pattern comparison</td>
+            <td>Module position in the response vector</td>
+          </tr>
+        </tbody>
+      </table>
+    </Table>
+  </Section>
+
+  <Section id="parts" title="Parts">
+    <p>
+      Parts used and contributed will be listed here with their registry numbers, so that another team can rebuild what
+      we build.
+    </p>
+    <Placeholder title="Parts table" kind="data" where="src/pages/synthetic-biology.astro">
+      <ul>
+        <li>Registry part number, name and type for every part used.</li>
+        <li>Which parts were newly designed by the team, and characterisation data for each.</li>
+        <li>Sequences and sources, and any changes made to existing parts.</li>
+      </ul>
+    </Placeholder>
+  </Section>
+</ChapterLayout>

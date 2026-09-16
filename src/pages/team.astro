@@ -1,0 +1,228 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import Section from '../components/content/Section.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import Table from '../components/content/Table.astro';
+import { areas, members, supporters } from '../data/team';
+import { site } from '../data/site';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'members', title: 'Members' },
+  { id: 'who-did-what', title: 'Who did what' },
+  { id: 'supporters', title: 'Advisors and support' },
+];
+---
+
+<PageLayout
+  title={`Team ${site.teamName}`}
+  eyebrow={`iGEM ${site.year}`}
+  lede={`OncoNose is built by students from ${site.country}. This page says who we are and, just as importantly, who did which part of the work.`}
+  toc={toc}
+>
+      <Section id="members" title="Members">
+        {
+          members.length === 0 ? (
+            <>
+              <p>
+                Team members have not been added to this site yet. Each person gets a name, a role, the discipline they
+                bring and the parts of the project they worked on.
+              </p>
+              <ul class="member-grid" aria-label="Team member placeholders">
+                {[0, 1, 2, 3, 4, 5].map(() => (
+                  <li class="member member--empty">
+                    <div class="member__photo" aria-hidden="true" />
+                    <p class="member__name">Name</p>
+                    <p class="member__role">Role and discipline</p>
+                  </li>
+                ))}
+              </ul>
+              <Placeholder title="Team members" where="src/data/team.ts">
+                <ul>
+                  <li>Name, role and discipline for every member.</li>
+                  <li>Which contribution areas each person worked on.</li>
+                  <li>Photographs uploaded to static.igem.wiki, with alt text.</li>
+                </ul>
+              </Placeholder>
+            </>
+          ) : (
+            <ul class="member-grid">
+              {members.map((member) => (
+                <li class="member">
+                  {member.photo ? (
+                    <img class="member__photo" src={member.photo} alt={member.alt ?? ''} loading="lazy" decoding="async" />
+                  ) : (
+                    <div class="member__photo" aria-hidden="true" />
+                  )}
+                  <p class="member__name">{member.name}</p>
+                  <p class="member__role">
+                    {member.role}
+                    <span>{member.discipline}</span>
+                  </p>
+                  <ul class="member__areas">
+                    {member.contributions.map((id) => (
+                      <li>{areas.find((a) => a.id === id)?.name ?? id}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </Section>
+
+      <Section id="who-did-what" title="Who did what">
+        <p>
+          Collaboration is easier to claim than to show. This matrix maps every contribution area to the people who
+          worked on it, so a reader can see how the work was actually shared.
+        </p>
+        <Table label="Contribution areas and the people working on them">
+          <table class="data">
+            <thead>
+              <tr>
+                <th scope="col">Area</th>
+                <th scope="col">What it covers</th>
+                <th scope="col">People</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                areas.map((area) => {
+                  const people = members.filter((m) => m.contributions.includes(area.id));
+                  return (
+                    <tr>
+                      <th scope="row">{area.name}</th>
+                      <td>{area.detail}</td>
+                      <td>
+                        {people.length ? (
+                          people.map((p) => p.name).join(', ')
+                        ) : (
+                          <span class="todo">To be filled in</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              }
+            </tbody>
+          </table>
+        </Table>
+        <p>
+          Contributions from people outside the team are recorded on the{' '}
+          <a href={href('attributions')}>attributions page</a>, as iGEM requires.
+        </p>
+      </Section>
+
+      <Section id="supporters" title="Advisors and support">
+        {
+          supporters.length === 0 ? (
+            <Placeholder title="Advisors, instructors, institutions and sponsors" where="src/data/team.ts">
+              <ul>
+                <li>Names and roles of advisors and instructors.</li>
+                <li>Host institution and laboratory space.</li>
+                <li>Sponsors, and what each one provided.</li>
+              </ul>
+            </Placeholder>
+          ) : (
+            <Table label="Advisors and supporters">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Relationship</th>
+                    <th scope="col">Contribution</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {supporters.map((supporter) => (
+                    <tr>
+                      <th scope="row">{supporter.name}</th>
+                      <td>{supporter.kind}</td>
+                      <td>{supporter.contribution}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Table>
+          )
+        }
+  </Section>
+</PageLayout>
+
+<style>
+  .member-grid {
+    display: grid;
+    gap: var(--sp-5);
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  }
+
+  .member__photo {
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    border-radius: var(--r-figure);
+    background: var(--paper-sunk);
+    border: 1px solid var(--rule);
+    object-fit: cover;
+  }
+
+  .member--empty .member__photo {
+    background:
+      repeating-linear-gradient(-45deg, transparent 0 8px, color-mix(in srgb, var(--rule-strong) 30%, transparent) 8px 9px),
+      var(--paper-sunk);
+  }
+
+  .member__name {
+    margin-top: var(--sp-3);
+    font-family: var(--font-sans);
+    font-weight: 650;
+  }
+
+  .member__role {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: 1.4;
+  }
+
+  .member__role span {
+    display: block;
+    color: var(--ink-3);
+  }
+
+  .member--empty .member__name,
+  .member--empty .member__role {
+    color: var(--ink-3);
+  }
+
+  .member__areas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: var(--sp-2) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .member__areas li {
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--r-pill);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--ink-2);
+  }
+
+  .todo {
+    color: var(--placeholder-ink);
+    background: var(--placeholder-bg);
+    border: 1px dashed var(--placeholder-edge);
+    border-radius: 4px;
+    padding: 0.05rem 0.4rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+  }
+</style>

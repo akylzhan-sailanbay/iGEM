@@ -1,0 +1,141 @@
+---
+/**
+ * Small schematic scene for each How it works step. Illustrative only.
+ */
+interface Props {
+  step: string;
+}
+const { step } = Astro.props;
+const dots = [
+  { x: 70, y: 70, f: 'metabolism' },
+  { x: 96, y: 92, f: 'oxidative' },
+  { x: 120, y: 64, f: 'inflammation' },
+  { x: 142, y: 98, f: 'metabolism' },
+  { x: 166, y: 74, f: 'oxidative' },
+];
+const cells = [0, 1, 2, 3, 4, 5].map((i) => ({ a: (Math.PI / 3) * i + Math.PI / 6 }));
+const glow = ['metabolism', 'metabolism', 'oxidative', 'oxidative', 'inflammation', 'inflammation'];
+const sig = [0.8, 0.7, 0.62, 0.55, 0.45, 0.4];
+const ref = [0.3, 0.28, 0.3, 0.26, 0.3, 0.27];
+const poly = (vals: number[], cx: number, cy: number, r: number) =>
+  vals
+    .map((v, i) => {
+      const a = -Math.PI / 2 + (i * Math.PI) / 3;
+      return `${(cx + Math.cos(a) * r * v).toFixed(1)},${(cy + Math.sin(a) * r * v).toFixed(1)}`;
+    })
+    .join(' ');
+---
+
+<svg class="scene" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
+  {
+    step === 'breath' && (
+      <g>
+        <path d="M30 60 q 24 30 0 60" fill="none" stroke="var(--on-dark-2)" stroke-width="3" stroke-linecap="round" />
+        {[0, 1, 2].map((i) => (
+          <path
+            d={`M52 ${72 + i * 18} q 22 -8 44 0 t 44 0 t 44 0`}
+            fill="none"
+            stroke="var(--air-glow)"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            opacity={0.9 - i * 0.2}
+          />
+        ))}
+        <rect x="200" y="46" width="92" height="92" rx="18" fill="var(--darkfield-2)" stroke="var(--air-glow)" stroke-width="2" />
+        <path d="M200 92 h-12" stroke="var(--air-glow)" stroke-width="2" />
+        <text x="246" y="160" text-anchor="middle" class="scene__label">Sample and room air</text>
+      </g>
+    )
+  }
+  {
+    step === 'vocs' && (
+      <g>
+        <rect x="24" y="40" width="96" height="100" rx="18" fill="var(--darkfield-2)" stroke="var(--air-glow)" stroke-width="2" />
+        <path d="M120 90 H200" stroke="var(--darkfield-line)" stroke-width="14" stroke-linecap="round" />
+        {dots.map((d) => (
+          <circle cx={d.x - 20} cy={d.y + 4} r="5" fill={`var(--${d.f}-glow)`} />
+        ))}
+        {dots.slice(0, 3).map((d, i) => (
+          <circle cx={140 + i * 22} cy={90} r="4.5" fill={`var(--${d.f}-glow)`} />
+        ))}
+        <circle cx="250" cy="90" r="46" fill="var(--darkfield-2)" stroke="var(--on-dark-3)" stroke-width="2" />
+        <text x="250" y="160" text-anchor="middle" class="scene__label">Sensing array</text>
+      </g>
+    )
+  }
+  {
+    step === 'respond' && (
+      <g>
+        {[0, 1, 2].map((i) => (
+          <g>
+            <circle cx={60 + i * 100} cy="84" r="40" fill="var(--darkfield-2)" stroke={`var(--${glow[i * 2]}-glow)`} stroke-width="2" />
+            <circle cx={60 + i * 100} cy="84" r="7" fill={`var(--${glow[i * 2]}-glow)`} opacity={0.35 + i * 0.3} />
+            {cells.map((c) => (
+              <circle
+                cx={60 + i * 100 + Math.cos(c.a) * 19}
+                cy={84 + Math.sin(c.a) * 19}
+                r="7"
+                fill={`var(--${glow[i * 2]}-glow)`}
+                opacity={0.35 + i * 0.3}
+              />
+            ))}
+          </g>
+        ))}
+        <text x="160" y="160" text-anchor="middle" class="scene__label">Brighter reporter means stronger response</text>
+      </g>
+    )
+  }
+  {
+    step === 'pattern' && (
+      <g>
+        {sig.map((v, i) => (
+          <g>
+            <rect x={48 + i * 40} y={130 - v * 100} width="26" height={v * 100} rx="3" fill={`var(--${glow[i]}-glow)`} />
+            <text x={61 + i * 40} y="150" text-anchor="middle" class="scene__label">M{i + 1}</text>
+          </g>
+        ))}
+        <line x1="36" y1="130" x2="290" y2="130" stroke="var(--on-dark-3)" stroke-width="1.5" />
+      </g>
+    )
+  }
+  {
+    step === 'analyse' && (
+      <g>
+        {[0.5, 1].map((k) => (
+          <circle cx="110" cy="88" r={64 * k} fill="none" stroke="var(--darkfield-line)" />
+        ))}
+        <polygon points={poly(ref, 110, 88, 64)} fill="none" stroke="var(--on-dark-3)" stroke-width="1.5" stroke-dasharray="4 3" />
+        <polygon points={poly(sig, 110, 88, 64)} fill="var(--air-glow)" fill-opacity="0.22" stroke="var(--on-dark)" stroke-width="2" />
+        <text x="214" y="70" class="scene__label">Dashed: reference</text>
+        <text x="214" y="94" class="scene__label">Solid: this sample</text>
+        <text x="214" y="118" class="scene__label">Compare the shape</text>
+      </g>
+    )
+  }
+  {
+    step === 'followup' && (
+      <g>
+        <polygon points={poly(sig, 64, 88, 44)} fill="var(--air-glow)" fill-opacity="0.22" stroke="var(--on-dark)" stroke-width="2" />
+        <path d="M122 88 H196" stroke="var(--on-dark-2)" stroke-width="2.5" stroke-dasharray="6 5" />
+        <path d="M190 80 l10 8 -10 8" fill="none" stroke="var(--on-dark-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        <rect x="214" y="48" width="84" height="80" rx="10" fill="var(--darkfield-2)" stroke="var(--on-dark-2)" stroke-width="2" />
+        <path d="M256 70 v36 M238 88 h36" stroke="var(--on-dark)" stroke-width="5" stroke-linecap="round" />
+        <text x="256" y="152" text-anchor="middle" class="scene__label">Clinical assessment</text>
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  .scene {
+    width: 100%;
+    height: auto;
+    font-family: var(--font-sans);
+  }
+
+  .scene__label {
+    fill: var(--on-dark-2);
+    font-size: 12px;
+    font-weight: 560;
+  }
+</style>

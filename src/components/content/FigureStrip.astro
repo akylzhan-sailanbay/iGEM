@@ -1,0 +1,85 @@
+---
+/**
+ * A row of key figures, each carrying its own source. Numbers never appear without one.
+ */
+import Cite from './Cite.astro';
+
+export interface StatItem {
+  value: string;
+  unit?: string;
+  label: string;
+  refId?: string;
+}
+
+interface Props {
+  items: StatItem[];
+}
+const { items } = Astro.props;
+---
+
+<dl class="strip">
+  {
+    items.map((item) => (
+      <div class="strip__item">
+        <dt class="strip__value tabular">
+          {item.value}
+          {item.unit && <span class="strip__unit">{item.unit}</span>}
+        </dt>
+        <dd class="strip__label">
+          {item.label}
+          {item.refId && <Cite id={item.refId} />}
+        </dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .strip {
+    display: grid;
+    gap: var(--sp-5);
+    margin-block: var(--sp-6);
+    padding-block: var(--sp-5);
+    border-top: 1.5px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  @media (min-width: 40rem) {
+    .strip {
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: var(--sp-6);
+    }
+
+    .strip__item + .strip__item {
+      padding-left: var(--sp-6);
+      border-left: 1px solid var(--rule);
+    }
+  }
+
+  .strip__value {
+    font-family: var(--font-sans);
+    font-size: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+    font-weight: 620;
+    font-stretch: 105%;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .strip__unit {
+    font-size: 0.45em;
+    font-weight: 560;
+    letter-spacing: 0;
+    margin-left: 0.15em;
+    color: var(--ink-2);
+  }
+
+  .strip__label {
+    margin: var(--sp-3) 0 0;
+    max-width: 34ch;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+</style>

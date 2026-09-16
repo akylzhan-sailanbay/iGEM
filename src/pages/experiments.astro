@@ -1,0 +1,286 @@
+---
+import ChapterLayout from '../layouts/ChapterLayout.astro';
+import Section from '../components/content/Section.astro';
+import Note from '../components/content/Note.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import Table from '../components/content/Table.astro';
+import StatusPill from '../components/content/StatusPill.astro';
+import WorkflowDiagram from '../components/science/WorkflowDiagram.astro';
+import { cycles, hypotheses, variables } from '../data/experiments';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'hypotheses', title: 'What we are testing' },
+  { id: 'workflow', title: 'The workflow' },
+  { id: 'variables', title: 'Variables' },
+  { id: 'engineering', title: 'Engineering cycles' },
+  { id: 'protocols', title: 'Protocols and notebook' },
+];
+
+const kinds = ['independent', 'dependent', 'controlled'] as const;
+const kindLabels = {
+  independent: 'Changed on purpose',
+  dependent: 'Measured',
+  controlled: 'Held constant',
+} as const;
+---
+
+<ChapterLayout
+  slug="experiments"
+  toc={toc}
+  brief={[
+    'Four hypotheses, each written with the result that would prove it wrong.',
+    'The workflow runs from construct design to array measurements, with controls named at every stage.',
+    'No experimental results are in yet, so this chapter is a plan, and it is labelled as one.',
+  ]}
+>
+  <Section
+    id="hypotheses"
+    title="What we are testing"
+    lead="A hypothesis that cannot fail is not a hypothesis, so each one below says what would falsify it."
+  >
+    <Table label="Hypotheses, predictions and tests">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Hypothesis</th>
+            <th scope="col">Prediction</th>
+            <th scope="col">How it is tested</th>
+            <th scope="col">What would falsify it</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            hypotheses.map((h) => (
+              <tr>
+                <th scope="row">
+                  <span class="hypothesis__id">{h.id}</span>
+                  {h.statement}
+                </th>
+                <td>{h.prediction}</td>
+                <td>{h.test}</td>
+                <td>{h.wouldFalsify}</td>
+                <td>
+                  <StatusPill kind={h.status === 'done' ? 'met' : 'planned'} label={h.status === 'done' ? 'Tested' : 'Planned'} />
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </Table>
+
+    <Note kind="context">
+      <p>
+        Results for each hypothesis will appear in <a href={href('results')}>Results</a>, under the same identifiers,
+        whether they support the hypothesis or not.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="workflow" title="The workflow">
+    <p>
+      Each stage produces something the next stage needs. Controls are listed with the stage they belong to, because a
+      control that is not run at the same time as the sample cannot do its job.
+    </p>
+    <WorkflowDiagram />
+  </Section>
+
+  <Section id="variables" title="Variables">
+    <p>
+      Keeping track of what changes, what is measured and what is held constant is what makes results comparable between
+      runs and between people.
+    </p>
+
+    <div class="variables">
+      {
+        kinds.map((kind) => (
+          <section class="variables__group" aria-labelledby={`vars-${kind}`}>
+            <h3 id={`vars-${kind}`}>{kindLabels[kind]}</h3>
+            <dl>
+              {variables
+                .filter((v) => v.kind === kind)
+                .map((v) => (
+                  <div>
+                    <dt>{v.name}</dt>
+                    <dd>{v.detail}</dd>
+                  </div>
+                ))}
+            </dl>
+          </section>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section id="engineering" title="Engineering cycles">
+    <p>
+      Engineering is a loop: design, build, test, learn, then design again. We record each turn of the loop, including
+      the ones that did not work, because the failures are what shaped the next design.
+    </p>
+
+    <ol class="cycles">
+      {
+        cycles.map((cycle) => (
+          <li class="cycle">
+            <div class="cycle__head">
+              <span class="cycle__num">Cycle {cycle.number}</span>
+              <h3>{cycle.title}</h3>
+            </div>
+            <div class="cycle__grid">
+              {(['design', 'build', 'test', 'learn'] as const).map((phase) => (
+                <div class="cycle__phase">
+                  <h4>{phase[0].toUpperCase() + phase.slice(1)}</h4>
+                  {cycle[phase] ? <p>{cycle[phase]}</p> : <p class="cycle__todo">Not done yet</p>}
+                </div>
+              ))}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <Placeholder title="Completed engineering cycles" where="src/data/experiments.ts">
+      <ul>
+        <li>One entry per cycle, including cycles that failed and what was changed as a result.</li>
+        <li>Link each cycle to the data that came out of it.</li>
+      </ul>
+    </Placeholder>
+  </Section>
+
+  <Section id="protocols" title="Protocols and notebook">
+    <p>
+      Anyone should be able to repeat what we did. Protocols and the dated notebook will be published here in full.
+    </p>
+    <Placeholder title="Protocols" where="src/pages/experiments.astro">
+      <ul>
+        <li>Growth, transformation and assay protocols, with volumes, times and equipment.</li>
+        <li>How compound standards are prepared and delivered.</li>
+        <li>Plate layouts, including where controls sit.</li>
+      </ul>
+    </Placeholder>
+    <Placeholder title="Laboratory notebook" where="src/pages/experiments.astro">
+      <ul>
+        <li>Dated entries with what was planned, what happened and what changed.</li>
+        <li>Links from each results figure back to the notebook entry behind it.</li>
+      </ul>
+    </Placeholder>
+  </Section>
+</ChapterLayout>
+
+<style>
+  .hypothesis__id {
+    display: inline-block;
+    margin-right: 0.4rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 4px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: var(--text-xs);
+    font-weight: 700;
+  }
+
+  .variables {
+    display: grid;
+    gap: var(--sp-5);
+    margin: var(--sp-6) 0;
+    font-family: var(--font-sans);
+  }
+
+  @media (min-width: 52rem) {
+    .variables {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--sp-6);
+    }
+  }
+
+  .variables__group h3 {
+    padding-bottom: var(--sp-2);
+    border-bottom: 1.5px solid var(--ink);
+    font-size: 0.95rem;
+  }
+
+  .variables dl {
+    margin: 0;
+  }
+
+  .variables dl div {
+    padding-block: var(--sp-3);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .variables dt {
+    font-weight: 620;
+    font-size: 0.95rem;
+  }
+
+  .variables dd {
+    margin: 0.15rem 0 0;
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .cycles {
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--sp-5);
+  }
+
+  .cycle {
+    padding: var(--sp-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-figure);
+    background: var(--paper-raised);
+    font-family: var(--font-sans);
+  }
+
+  .cycle__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding-bottom: var(--sp-4);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cycle__num {
+    font-size: var(--text-sm);
+    font-weight: 650;
+    color: var(--air-ink);
+  }
+
+  .cycle__grid {
+    display: grid;
+    gap: var(--sp-4);
+    margin-top: var(--sp-4);
+  }
+
+  @media (min-width: 52rem) {
+    .cycle__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .cycle__phase h4 {
+    font-size: 0.9rem;
+    font-weight: 650;
+    color: var(--ink-3);
+  }
+
+  .cycle__phase p {
+    margin-top: var(--sp-2);
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .cycle__todo {
+    color: var(--placeholder-ink);
+    font-style: italic;
+  }
+</style>

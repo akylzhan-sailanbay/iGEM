@@ -1,0 +1,118 @@
+---
+import ChapterLayout from '../layouts/ChapterLayout.astro';
+import Section from '../components/content/Section.astro';
+import Note from '../components/content/Note.astro';
+import Table from '../components/content/Table.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import PipelineExplorer from '../components/science/PipelineExplorer.astro';
+import { pipeline, statusLabel } from '../data/pipeline';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'six-steps', title: 'Six steps, one breath' },
+  { id: 'controls', title: 'Controls travel with every sample' },
+  { id: 'where-it-can-fail', title: 'Where the chain can break' },
+];
+---
+
+<ChapterLayout
+  slug="how-it-works"
+  toc={toc}
+  brief={[
+    'Six steps take a breath sample to a pattern, and a pattern to a referral for standard clinical assessment.',
+    'Every step carries its own uncertainty, and each one is marked with where the project actually stands.',
+    'Controls matter as much as samples: room air, blanks and reference standards are part of every measurement.',
+  ]}
+>
+  <Section
+    id="six-steps"
+    title="Six steps, one breath"
+    lead="Open a step to see what happens, what we would have to demonstrate, and what is still an open question."
+  >
+    <PipelineExplorer />
+  </Section>
+
+  <Section id="controls" title="Controls travel with every sample">
+    <p>
+      A breath measurement is only meaningful next to the things it is compared with. Three controls are part of the
+      design rather than an afterthought, because without them a signal cannot be separated from the room, the device or
+      the cells themselves.
+    </p>
+
+    <Table label="Controls planned for every measurement">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Control</th>
+            <th scope="col">What it rules out</th>
+            <th scope="col">When it is measured</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Room air blank</th>
+            <td>Compounds that come from the environment rather than the person</td>
+            <td>Alongside each breath sample</td>
+          </tr>
+          <tr>
+            <th scope="row">Unexposed modules</th>
+            <td>Background reporter signal and drift in the cells themselves</td>
+            <td>Every run, same batch of cells</td>
+          </tr>
+          <tr>
+            <th scope="row">Known compound standard</th>
+            <td>Loss of module sensitivity between batches or over time</td>
+            <td>Every run, at a fixed concentration</td>
+          </tr>
+        </tbody>
+      </table>
+    </Table>
+
+    <Note kind="context">
+      <p>
+        The experimental controls used in the laboratory work are described in{' '}
+        <a href={href('experiments')}>Experiments</a>, where they are tied to specific hypotheses.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="where-it-can-fail" title="Where the chain can break">
+    <p>
+      Each step depends on the one before it. If sampling is inconsistent, nothing downstream can recover; if the
+      modules respond to everything equally, the pattern carries no information. This is the honest status of each link.
+    </p>
+
+    <Table label="Status of each step in the chain">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Step</th>
+            <th scope="col">Where the project stands</th>
+            <th scope="col">Biggest open question</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            pipeline.map((step, i) => (
+              <tr>
+                <th scope="row">
+                  {i + 1}. {step.short}
+                </th>
+                <td>{statusLabel[step.status]}</td>
+                <td>{step.openQuestions[0]}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </Table>
+
+    <Placeholder title="Device and cartridge design, if the team builds hardware" where="src/pages/how-it-works.astro">
+      <ul>
+        <li>How the sample reaches the modules in a physical prototype.</li>
+        <li>How the reporter signal is read, and with what optics.</li>
+        <li>Photographs or CAD renderings of the prototype.</li>
+      </ul>
+    </Placeholder>
+  </Section>
+</ChapterLayout>

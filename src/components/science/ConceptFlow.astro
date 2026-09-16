@@ -1,0 +1,173 @@
+---
+/**
+ * The OncoNose concept in one band: what enters, what responds, what comes out.
+ */
+const stages = [
+  { title: 'Breath', detail: 'A sample of exhaled air, plus room air for comparison.' },
+  { title: 'VOCs', detail: 'Volatile organic compounds carried in that air.' },
+  { title: 'Sensing modules', detail: 'Engineered cells that respond to compounds and report with a signal.' },
+  { title: 'Signature', detail: 'All module responses read together as one pattern.' },
+  { title: 'Screening decision', detail: 'Patterns unlike the reference are referred for clinical assessment.' },
+];
+---
+
+<div class="flow on-dark">
+  <ol class="flow__list">
+    {
+      stages.map((stage, i) => (
+        <li class="flow__stage">
+          <div class="flow__glyph" aria-hidden="true">
+            <svg viewBox="0 0 64 48">
+              {i === 0 && (
+                <g fill="none" stroke="var(--air-glow)" stroke-width="2.5" stroke-linecap="round">
+                  <path d="M8 14 q 12 -6 24 0 t 24 0" />
+                  <path d="M8 24 q 12 -6 24 0 t 24 0" opacity="0.7" />
+                  <path d="M8 34 q 12 -6 24 0 t 24 0" opacity="0.45" />
+                </g>
+              )}
+              {i === 1 && (
+                <g>
+                  <circle cx="18" cy="18" r="5.5" fill="var(--metabolism-glow)" />
+                  <path d="M40 10 45.5 15.5 40 21 34.5 15.5Z" fill="var(--oxidative-glow)" />
+                  <path d="M30 28 35.5 38H24.5Z" fill="var(--inflammation-glow)" />
+                  <circle cx="50" cy="32" r="4.5" fill="var(--metabolism-glow)" opacity="0.7" />
+                </g>
+              )}
+              {i === 2 && (
+                <g>
+                  {[0, 1, 2].map((k) => (
+                    <circle
+                      cx={14 + k * 18}
+                      cy="24"
+                      r="9"
+                      fill={`var(--${['metabolism', 'oxidative', 'inflammation'][k]}-glow)`}
+                      fill-opacity="0.35"
+                      stroke={`var(--${['metabolism', 'oxidative', 'inflammation'][k]}-glow)`}
+                      stroke-width="2"
+                    />
+                  ))}
+                </g>
+              )}
+              {i === 3 && (
+                <g>
+                  <polygon
+                    points="32,8 48,17 48,33 32,42 16,33 16,17"
+                    fill="var(--air-glow)"
+                    fill-opacity="0.22"
+                    stroke="var(--on-dark)"
+                    stroke-width="2"
+                  />
+                </g>
+              )}
+              {i === 4 && (
+                <g fill="none" stroke="var(--on-dark)" stroke-width="2.5" stroke-linecap="round">
+                  <path d="M12 24h28" stroke-dasharray="5 4" />
+                  <path d="M36 17l7 7-7 7" />
+                  <path d="M50 12v24" stroke="var(--on-dark-3)" />
+                </g>
+              )}
+            </svg>
+          </div>
+          <h3>{stage.title}</h3>
+          <p>{stage.detail}</p>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .flow {
+    background: var(--darkfield);
+    color: var(--on-dark);
+    border-radius: var(--r-device);
+    padding: clamp(1rem, 2.5vw, 1.75rem);
+    font-family: var(--font-sans);
+  }
+
+  .flow__list {
+    display: grid;
+    gap: var(--sp-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .flow__stage {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    gap: var(--sp-3) var(--sp-4);
+    align-items: center;
+    padding-bottom: var(--sp-4);
+    border-bottom: 1px solid var(--darkfield-line);
+  }
+
+  .flow__stage:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .flow__glyph {
+    grid-row: span 2;
+    display: grid;
+    place-items: center;
+    height: 3rem;
+  }
+
+  .flow__glyph svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .flow h3 {
+    align-self: end;
+    font-size: 1rem;
+  }
+
+  .flow p {
+    align-self: start;
+    max-width: 44ch;
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--on-dark-2);
+  }
+
+  @media (min-width: 52rem) {
+    .flow__list {
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: var(--sp-5);
+    }
+
+    .flow__stage {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr;
+      align-items: start;
+      padding: 0 var(--sp-4) 0 0;
+      border-bottom: 0;
+      border-right: 1px solid var(--darkfield-line);
+    }
+
+    .flow__stage:last-child {
+      border-right: 0;
+      padding-right: 0;
+    }
+
+    .flow__glyph {
+      grid-row: auto;
+      justify-items: start;
+      width: 4rem;
+      margin-bottom: var(--sp-3);
+    }
+
+    .flow h3 {
+      align-self: start;
+    }
+
+    .flow p {
+      margin-top: var(--sp-2);
+    }
+  }
+</style>

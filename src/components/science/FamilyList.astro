@@ -1,0 +1,67 @@
+---
+/**
+ * The three signal families with their colour and shape encoding.
+ */
+import { families } from '../../data/signals';
+---
+
+<ul class="families" role="list">
+  {
+    families.map((f) => (
+      <li class="family" data-family={f.id}>
+        <svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true">
+          {f.glyph === 'circle' && <circle cx="14" cy="14" r="10" />}
+          {f.glyph === 'diamond' && <path d="M14 3 25 14 14 25 3 14Z" />}
+          {f.glyph === 'triangle' && <path d="M14 3.5 25 23.5H3Z" />}
+        </svg>
+        <div>
+          <h3>{f.name}</h3>
+          <p>{f.why}</p>
+        </div>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .families {
+    display: grid;
+    gap: var(--sp-5);
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 48rem) {
+    .families {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--sp-6);
+    }
+  }
+
+  .family {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: var(--sp-3);
+    padding-top: var(--sp-4);
+    border-top: 3px solid var(--family);
+  }
+
+  .family svg {
+    fill: var(--family-tint);
+    stroke: var(--family-ink);
+    stroke-width: 2;
+  }
+
+  .family h3 {
+    font-size: 1.05rem;
+    color: var(--family-ink);
+  }
+
+  .family p {
+    margin-top: var(--sp-2);
+    font-size: 0.975rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+</style>

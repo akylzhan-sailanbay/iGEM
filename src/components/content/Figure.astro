@@ -1,0 +1,85 @@
+---
+/**
+ * A figure with a numbered-free caption and an explicit evidence status.
+ *   illustrative — a schematic or simulation, not measured data
+ *   data         — our measured data (say which experiment in the caption)
+ *   literature   — adapted from a cited source
+ */
+interface Props {
+  caption: string;
+  status?: 'illustrative' | 'data' | 'literature';
+  surface?: 'paper' | 'dark' | 'none';
+  class?: string;
+}
+const { caption, status = 'illustrative', surface = 'paper', class: className } = Astro.props;
+
+const statusLabel = {
+  illustrative: 'Illustrative schematic, not measured data',
+  data: 'Experimental data',
+  literature: 'Adapted from the literature',
+} as const;
+---
+
+<figure class:list={['fig', `fig--${surface}`, className]}>
+  <div class:list={['fig__media', { 'on-dark': surface === 'dark' }]}>
+    <slot />
+  </div>
+  <figcaption class="fig__caption">
+    <span class:list={['fig__status', `fig__status--${status}`]}>{statusLabel[status]}</span>
+    <span class="fig__text">{caption}<slot name="caption" /></span>
+  </figcaption>
+</figure>
+
+<style>
+  .fig {
+    margin-block: var(--sp-7);
+  }
+
+  .fig__media {
+    border-radius: var(--r-figure);
+    overflow: hidden;
+  }
+
+  .fig--paper .fig__media {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+  }
+
+  .fig--dark .fig__media {
+    background: var(--darkfield);
+    color: var(--on-dark);
+  }
+
+  .fig--none .fig__media {
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .fig__caption {
+    display: grid;
+    gap: 0.2rem;
+    margin-top: var(--sp-3);
+    max-width: var(--measure);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .fig__status {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+  }
+
+  .fig__status--illustrative {
+    color: var(--ink-3);
+  }
+
+  .fig__status--data {
+    color: var(--metabolism-ink);
+  }
+
+  .fig__status--literature {
+    color: var(--air-ink);
+  }
+</style>

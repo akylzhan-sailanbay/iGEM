@@ -1,0 +1,103 @@
+---
+/**
+ * Progressive disclosure for specialist detail. General readers can skip it; scientists can open it.
+ */
+interface Props {
+  summary: string;
+  open?: boolean;
+}
+const { summary, open = false } = Astro.props;
+---
+
+<details class="tech" open={open}>
+  <summary>
+    <span class="tech__kind">Technical detail</span>
+    <span class="tech__summary">{summary}</span>
+    <span class="tech__icon" aria-hidden="true"></span>
+  </summary>
+  <div class="tech__body prose">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .tech {
+    max-width: var(--measure);
+    border-top: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule-strong);
+  }
+
+  .tech + :global(.tech) {
+    margin-top: -1px !important;
+    border-top-color: var(--rule);
+  }
+
+  summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--sp-4);
+    padding: var(--sp-4) 0;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-sans);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .tech__kind {
+    grid-column: 1;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--air-ink);
+  }
+
+  .tech__summary {
+    grid-column: 1;
+    font-weight: 600;
+    font-size: 1.02rem;
+    line-height: 1.35;
+  }
+
+  .tech__icon {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    position: relative;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--rule-strong);
+  }
+
+  .tech__icon::before,
+  .tech__icon::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0.7rem;
+    height: 1.5px;
+    background: currentColor;
+    transform: translate(-50%, -50%);
+    transition: transform var(--dur-mid) var(--ease-out);
+  }
+
+  .tech__icon::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  details[open] .tech__icon::after {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  summary:hover .tech__summary {
+    text-decoration: underline;
+  }
+
+  .tech__body {
+    padding-bottom: var(--sp-5);
+    font-size: 0.97em;
+  }
+</style>

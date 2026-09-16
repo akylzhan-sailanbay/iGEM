@@ -1,0 +1,286 @@
+---
+import ChapterLayout from '../layouts/ChapterLayout.astro';
+import Section from '../components/content/Section.astro';
+import Cite from '../components/content/Cite.astro';
+import Note from '../components/content/Note.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import Table from '../components/content/Table.astro';
+import { engagements, principles, stakeholders } from '../data/human-practices';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'approach', title: 'How we work with people' },
+  { id: 'stakeholders', title: 'Who we need to hear from' },
+  { id: 'engagements', title: 'What we heard, and what changed' },
+  { id: 'context', title: 'Designing for Kazakhstan' },
+  { id: 'principles', title: 'Principles we hold ourselves to' },
+];
+
+const refs = ['avizova2026', 'akhmedullin2024', 'wilson1968'];
+---
+
+<ChapterLayout
+  slug="human-practices"
+  toc={toc}
+  refs={refs}
+  brief={[
+    'A screening test is a health-system decision: who is tested, what a result means, and what happens next.',
+    'We list who we need to hear from and what we will ask them, and we record only conversations that have happened.',
+    'Affordability, portability and follow-up capacity shape the design as much as the biology does.',
+  ]}
+>
+  <Section id="approach" title="How we work with people">
+    <p>
+      Human practices is not a survey at the end of a project. The questions we ask other people change what we build,
+      so we treat each conversation as an input to the design and record what it changed.
+    </p>
+    <ol class="loop">
+      <li><span>Ask</span>People who would use, prescribe or regulate a breath test.</li>
+      <li><span>Understand</span>What constrains them: cost, time, trust, infrastructure, law.</li>
+      <li><span>Change</span>The design, the claims, or the plan, and write down which.</li>
+      <li><span>Check back</span>Return with the change and ask whether it actually helps.</li>
+    </ol>
+  </Section>
+
+  <Section id="stakeholders" title="Who we need to hear from">
+    <p>
+      These are the groups whose answers would change the project, with the questions we intend to put to them.
+      Publishing the questions before the conversations keeps us honest about what we learned afterwards.
+    </p>
+
+    <div class="stakeholders">
+      {
+        stakeholders.map((group) => (
+          <section class="stakeholder" aria-labelledby={`sh-${group.id}`}>
+            <h3 id={`sh-${group.id}`}>{group.name}</h3>
+            <p class="stakeholder__who">{group.who}</p>
+            <p class="stakeholder__why">{group.whyThem}</p>
+            <h4>What we ask</h4>
+            <ul>
+              {group.whatWeAsk.map((question) => (
+                <li>{question}</li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section id="engagements" title="What we heard, and what changed">
+    {
+      engagements.length === 0 ? (
+        <>
+          <p>
+            No engagements have taken place yet. When they do, each one will be recorded here with the date, who we
+            spoke to and, most importantly, what we changed as a result.
+          </p>
+          <Placeholder title="Engagement log" where="src/data/human-practices.ts">
+            <ul>
+              <li>Date, who was involved and in what capacity.</li>
+              <li>What they told us, including anything that contradicted our assumptions.</li>
+              <li>The specific change we made to the design, claims or plan.</li>
+            </ul>
+          </Placeholder>
+        </>
+      ) : (
+        <Table label="Engagement log">
+          <table class="data">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Who</th>
+                <th scope="col">What we discussed</th>
+                <th scope="col">What we changed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {engagements.map((e) => (
+                <tr>
+                  <th scope="row">{e.date}</th>
+                  <td>{e.who}</td>
+                  <td>{e.what}</td>
+                  <td>{e.changed}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Table>
+      )
+    }
+  </Section>
+
+  <Section id="context" title="Designing for Kazakhstan">
+    <p>
+      The project starts from a local problem. Lung cancers were the largest share of cancer deaths recorded nationally
+      between 2014 and 2022,<Cite id="akhmedullin2024" /> and patients in the 2019–2023 national cohort were usually
+      recorded at an advanced stage.<Cite id="avizova2026" /> A test that could be produced and run locally, without a
+      scanner, is worth investigating for that reason.
+    </p>
+    <p>
+      Whether it would help depends on facts we do not have yet: where screening capacity sits today, how far people
+      travel for a scan, and what a clinic can afford to run. Those are questions for the people in the section above,
+      and Wilson and Jungner's principle that facilities must exist for diagnosis and treatment applies before any of
+      this is useful.<Cite id="wilson1968" />
+    </p>
+
+    <Placeholder title="Kazakhstan healthcare context, with sources" where="src/pages/human-practices.astro">
+      <ul>
+        <li>How lung cancer screening and referral work today, cited to official sources.</li>
+        <li>Distribution of CT capacity and oncology services by region.</li>
+        <li>What a primary care clinic could realistically afford per test.</li>
+        <li>Notes from conversations with the groups listed above.</li>
+      </ul>
+    </Placeholder>
+
+    <Note kind="hypothesis" title="Design targets, to be checked with the people who would use it">
+      <p>
+        We are designing towards a test that can be produced with standard laboratory equipment, read with simple
+        optics, and run by trained staff without a specialist laboratory. Each of those targets needs to be confirmed
+        with clinicians and manufacturers before it means anything.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="principles" title="Principles we hold ourselves to">
+    <ol class="principles">
+      {
+        principles.map((principle) => (
+          <li>
+            <h3>{principle.title}</h3>
+            <p>{principle.detail}</p>
+          </li>
+        ))
+      }
+    </ol>
+    <p>
+      The safety, ethics and validation consequences of these principles are set out in{' '}
+      <a href={href('safety-and-security')}>Safety and ethics</a>.
+    </p>
+  </Section>
+</ChapterLayout>
+
+<style>
+  .loop {
+    display: grid;
+    gap: var(--sp-3);
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-sans);
+    counter-reset: loop;
+  }
+
+  @media (min-width: 52rem) {
+    .loop {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--sp-4);
+    }
+  }
+
+  .loop li {
+    display: grid;
+    gap: var(--sp-2);
+    padding: var(--sp-4);
+    border-top: 2px solid var(--ink);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--ink-2);
+    background: var(--paper-raised);
+  }
+
+  .loop span {
+    font-size: 1.05rem;
+    font-weight: 650;
+    color: var(--ink);
+  }
+
+  .stakeholders {
+    display: grid;
+    gap: var(--sp-4);
+    margin: var(--sp-6) 0;
+  }
+
+  @media (min-width: 52rem) {
+    .stakeholders {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stakeholder:first-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .stakeholder {
+    padding: var(--sp-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-figure);
+    font-family: var(--font-sans);
+  }
+
+  .stakeholder h3 {
+    font-size: 1.15rem;
+  }
+
+  .stakeholder__who {
+    margin-top: var(--sp-2);
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .stakeholder__why {
+    margin-top: var(--sp-3);
+    font-family: var(--font-serif);
+    max-width: 58ch;
+  }
+
+  .stakeholder h4 {
+    margin-top: var(--sp-4);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--ink-3);
+  }
+
+  .stakeholder ul {
+    margin: var(--sp-2) 0 0;
+    padding-left: 1.05em;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .stakeholder li + li {
+    margin-top: var(--sp-1);
+  }
+
+  .principles {
+    display: grid;
+    gap: 0;
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .principles li {
+    display: grid;
+    gap: var(--sp-2);
+    padding-block: var(--sp-5);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  @media (min-width: 52rem) {
+    .principles li {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--sp-6);
+    }
+  }
+
+  .principles h3 {
+    font-size: 1.1rem;
+  }
+
+  .principles p {
+    max-width: 62ch;
+  }
+</style>

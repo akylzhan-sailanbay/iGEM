@@ -1,0 +1,104 @@
+---
+import { chapters } from '../../data/chapters';
+import { href } from '../../lib/paths';
+
+interface Props {
+  current: string;
+}
+const { current } = Astro.props;
+const index = chapters.findIndex((c) => c.slug === current);
+const prev = index > 0 ? chapters[index - 1] : null;
+const next = index < chapters.length - 1 ? chapters[index + 1] : null;
+---
+
+<nav class="prev-next" aria-label="Chapter">
+  {
+    prev ? (
+      <a class="prev-next__link prev-next__link--prev" href={href(prev.slug)} rel="prev">
+        <span class="prev-next__dir">Previous chapter</span>
+        <span class="prev-next__title">{prev.nav}</span>
+        <span class="prev-next__question">{prev.question}</span>
+      </a>
+    ) : (
+      <a class="prev-next__link prev-next__link--prev" href={href('/')}>
+        <span class="prev-next__dir">Back to</span>
+        <span class="prev-next__title">Home</span>
+        <span class="prev-next__question">The project at a glance</span>
+      </a>
+    )
+  }
+  {
+    next ? (
+      <a class="prev-next__link prev-next__link--next" href={href(next.slug)} rel="next">
+        <span class="prev-next__dir">Next chapter</span>
+        <span class="prev-next__title">{next.nav}</span>
+        <span class="prev-next__question">{next.question}</span>
+      </a>
+    ) : (
+      <a class="prev-next__link prev-next__link--next" href={href('team')}>
+        <span class="prev-next__dir">Meet</span>
+        <span class="prev-next__title">The team</span>
+        <span class="prev-next__question">Who did what</span>
+      </a>
+    )
+  }
+</nav>
+
+<style>
+  .prev-next {
+    display: grid;
+    gap: var(--sp-4);
+    margin-top: var(--sp-9);
+    font-family: var(--font-sans);
+  }
+
+  @media (min-width: 40rem) {
+    .prev-next {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .prev-next__link {
+    display: grid;
+    gap: 0.2rem;
+    padding: var(--sp-5) 0;
+    border-top: 1.5px solid var(--ink);
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .prev-next__link--next {
+    text-align: right;
+  }
+
+  @media (max-width: 39.99rem) {
+    .prev-next__link--next {
+      text-align: left;
+    }
+  }
+
+  .prev-next__dir {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .prev-next__title {
+    font-size: var(--text-h2);
+    font-weight: 660;
+    font-stretch: 110%;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .prev-next__question {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--ink-2);
+  }
+
+  .prev-next__link:hover .prev-next__title {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.15em;
+  }
+</style>

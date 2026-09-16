@@ -1,0 +1,170 @@
+---
+/**
+ * Shared frame for every chart: title, evidence status, caption and, when there is no data yet,
+ * an explicit empty state instead of an invented figure.
+ */
+interface Props {
+  title: string;
+  caption: string;
+  hasData: boolean;
+  /** What is missing and where it goes, shown in the empty state */
+  awaiting?: string;
+  where?: string;
+  /** Set for schematics that are meant to be illustrative rather than measured */
+  illustrative?: boolean;
+}
+const { title, caption, hasData, awaiting, where, illustrative = false } = Astro.props;
+const status = hasData ? (illustrative ? 'illustrative' : 'data') : 'awaiting';
+const statusText = {
+  data: 'Our measured data',
+  illustrative: 'Illustrative, not measured data',
+  awaiting: 'No data yet',
+} as const;
+---
+
+<figure class:list={['chart', `chart--${status}`]}>
+  <figcaption class="chart__head">
+    <h3 class="chart__title">{title}</h3>
+    <p class="chart__status">{statusText[status]}</p>
+  </figcaption>
+
+  <div class="chart__body">
+    {
+      hasData ? (
+        <slot />
+      ) : (
+        <div class="chart__empty">
+          <svg viewBox="0 0 320 160" aria-hidden="true" class="chart__ghost">
+            <path d="M40 16 V128 H300" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path
+              d="M40 112 C 90 108, 130 96, 170 70 S 250 28, 300 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-dasharray="6 6"
+              opacity="0.5"
+            />
+          </svg>
+          <div class="chart__empty-text">
+            <p class="chart__empty-title">Waiting for data</p>
+            {awaiting && <p>{awaiting}</p>}
+            {where && (
+              <p class="chart__empty-where">
+                Add it in <code>{where}</code>
+              </p>
+            )}
+          </div>
+        </div>
+      )
+    }
+  </div>
+
+  <p class="chart__caption">{caption}</p>
+</figure>
+
+<style>
+  .chart {
+    margin: var(--sp-6) 0;
+    padding: var(--sp-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-figure);
+    background: var(--paper-raised);
+  }
+
+  .chart--awaiting {
+    border-style: dashed;
+    border-color: var(--placeholder-edge);
+    background:
+      repeating-linear-gradient(
+        -45deg,
+        transparent 0 12px,
+        color-mix(in srgb, var(--placeholder-edge) 7%, transparent) 12px 13px
+      ),
+      var(--placeholder-bg);
+  }
+
+  .chart__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-2) var(--sp-4);
+    padding-bottom: var(--sp-4);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .chart__title {
+    font-size: 1.05rem;
+  }
+
+  .chart__status {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 650;
+    color: var(--ink-3);
+  }
+
+  .chart--data .chart__status {
+    color: var(--metabolism-ink);
+  }
+
+  .chart--awaiting .chart__status {
+    color: var(--placeholder-ink);
+  }
+
+  .chart__body {
+    padding-top: var(--sp-4);
+  }
+
+  .chart__empty {
+    display: grid;
+    gap: var(--sp-4);
+    align-items: center;
+    font-family: var(--font-sans);
+    color: var(--placeholder-ink);
+  }
+
+  @media (min-width: 40rem) {
+    .chart__empty {
+      grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+      gap: var(--sp-6);
+    }
+  }
+
+  .chart__ghost {
+    width: 100%;
+    height: auto;
+    color: var(--placeholder-edge);
+  }
+
+  .chart__empty-title {
+    font-weight: 700;
+  }
+
+  .chart__empty-text p {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    max-width: 46ch;
+  }
+
+  .chart__empty-text p + p {
+    margin-top: var(--sp-2);
+  }
+
+  .chart__empty-where code {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.85em;
+    padding: 0.05rem 0.3rem;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--placeholder-edge) 16%, transparent);
+    overflow-wrap: anywhere;
+  }
+
+  .chart__caption {
+    margin-top: var(--sp-4);
+    max-width: var(--measure);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+</style>

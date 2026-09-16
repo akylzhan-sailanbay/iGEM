@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeHero from '../components/home/HomeHero.astro';
+import BreathInstrument from '../components/home/BreathInstrument.astro';
+import QuestionIndex from '../components/home/QuestionIndex.astro';
+import ProjectStatus from '../components/home/ProjectStatus.astro';
+---
+
+<BaseLayout>
+  <HomeHero />
+  <div class="container">
+    <BreathInstrument />
+  </div>
+  <QuestionIndex />
+  <ProjectStatus />
+</BaseLayout>

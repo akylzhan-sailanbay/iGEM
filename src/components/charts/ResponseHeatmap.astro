@@ -1,0 +1,138 @@
+---
+/**
+ * Response matrix: modules against compounds (or samples). Values are 0–1 after normalisation.
+ * Missing values are drawn as an explicit gap, never as zero.
+ */
+interface Props {
+  rowLabels: string[];
+  colLabels: string[];
+  /** values[row][col], null where not measured */
+  values: (number | null)[][];
+  rowTitle: string;
+  colTitle: string;
+}
+const { rowLabels, colLabels, values, rowTitle, colTitle } = Astro.props;
+
+const cell = 54;
+const gap = 4;
+const left = 110;
+const longLabels = colLabels.some((label) => label.length > 8);
+const top = longLabels ? 78 : 56;
+const width = left + colLabels.length * (cell + gap) + (longLabels ? 24 : 0);
+const height = top + rowLabels.length * (cell + gap) + 18;
+---
+
+<div class="heatmap">
+  <svg
+    viewBox={`0 0 ${width} ${height}`}
+    style={`max-width:${width}px`}
+    role="img"
+    aria-label={`${rowTitle} against ${colTitle}`}
+  >
+    {
+      colLabels.map((label, c) => {
+        const x = left + c * (cell + gap) + cell / 2;
+        return longLabels ? (
+          <text class="heatmap__col" x={x} y={top - 12} text-anchor="start" transform={`rotate(-35 ${x} ${top - 12})`}>
+            {label}
+          </text>
+        ) : (
+          <text class="heatmap__col" x={x} y={top - 14} text-anchor="middle">
+            {label}
+          </text>
+        );
+      })
+    }
+    {
+      rowLabels.map((label, r) => (
+        <text class="heatmap__row" x={left - 12} y={top + r * (cell + gap) + cell / 2 + 4} text-anchor="end">
+          {label}
+        </text>
+      ))
+    }
+    {
+      values.map((row, r) =>
+        row.map((value, c) => (
+          <g>
+            <rect
+              x={left + c * (cell + gap)}
+              y={top + r * (cell + gap)}
+              width={cell}
+              height={cell}
+              rx="4"
+              class:list={['heatmap__cell', { 'is-missing': value === null }]}
+              style={value === null ? undefined : `--v:${value}`}
+            />
+            <text
+              class:list={['heatmap__value', { 'is-strong': (value ?? 0) > 0.55 }]}
+              x={left + c * (cell + gap) + cell / 2}
+              y={top + r * (cell + gap) + cell / 2 + 4}
+              text-anchor="middle"
+            >
+              {value === null ? '—' : Math.round(value * 100)}
+            </text>
+          </g>
+        )),
+      )
+    }
+  </svg>
+  <p class="heatmap__legend">
+    <span class="heatmap__scale" aria-hidden="true"></span>
+    Response, 0 to 100, after background correction. A dash means not measured.
+  </p>
+</div>
+
+<style>
+  .heatmap svg {
+    width: 100%;
+    height: auto;
+    font-family: var(--font-sans);
+  }
+
+  .heatmap__col,
+  .heatmap__row {
+    fill: var(--ink-2);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .heatmap__cell {
+    --v: 0;
+    fill: color-mix(in srgb, var(--air-ink) calc(var(--v) * 100%), var(--paper-sunk));
+  }
+
+  .heatmap__cell.is-missing {
+    fill: none;
+    stroke: var(--rule-strong);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 4;
+  }
+
+  .heatmap__value {
+    fill: var(--ink);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .heatmap__value.is-strong {
+    fill: var(--paper);
+  }
+
+  .heatmap__legend {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-top: var(--sp-3);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .heatmap__scale {
+    width: 6rem;
+    height: 0.6rem;
+    border-radius: var(--r-pill);
+    background: linear-gradient(90deg, var(--paper-sunk), var(--air-ink));
+    border: 1px solid var(--rule-strong);
+  }
+</style>

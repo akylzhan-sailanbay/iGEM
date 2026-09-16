@@ -1,0 +1,215 @@
+---
+import { geometries, pointsAttr, signaturePoints, type LayoutKind } from '../../lib/instrument-geometry';
+
+interface Props {
+  kind: LayoutKind;
+  values: number[];
+  reference: number[];
+  labelledBy: string;
+}
+const { kind, values, reference, labelledBy } = Astro.props;
+const g = geometries[kind];
+const id = (name: string) => `${kind}-${name}`;
+
+const current = signaturePoints(g, values);
+const ref = signaturePoints(g, reference);
+const { cx, cy, r } = g.signature;
+---
+
+<svg
+  class:list={['instrument-svg', `instrument-svg--${kind}`]}
+  viewBox={`0 0 ${g.width} ${g.height}`}
+  role="img"
+  aria-labelledby={labelledBy}
+  data-layout={kind}
+>
+  <defs>
+    {
+      (['metabolism', 'oxidative', 'inflammation'] as const).map((family) => (
+        <radialGradient id={id(`halo-${family}`)}>
+          <stop offset="0" stop-color={`var(--${family}-glow)`} stop-opacity="0.55" />
+          <stop offset="0.6" stop-color={`var(--${family}-glow)`} stop-opacity="0.18" />
+          <stop offset="1" stop-color={`var(--${family}-glow)`} stop-opacity="0" />
+        </radialGradient>
+      ))
+    }
+    <linearGradient id={id('breath')} x1="0" y1="0" x2={kind === 'wide' ? '1' : '0'} y2={kind === 'wide' ? '0' : '1'}>
+      <stop offset="0" stop-color="var(--air-glow)" stop-opacity="0.05" />
+      <stop offset="1" stop-color="var(--air-glow)" stop-opacity="0.35" />
+    </linearGradient>
+  </defs>
+
+  <!-- Breath inlet -->
+  <g class="inlet">
+    <rect
+      x={g.inlet.x}
+      y={g.inlet.y}
+      width={g.inlet.w}
+      height={g.inlet.h}
+      rx={Math.min(g.inlet.w, g.inlet.h) / 2}
+      fill={`url(#${id('breath')})`}
+      stroke="var(--darkfield-line)"
+      stroke-width="2"
+    ></rect>
+    {
+      kind === 'wide'
+        ? [0, 1, 2].map((i) => (
+            <path
+              class="inlet__flow"
+              d={`M${g.inlet.x + 30} ${g.inlet.y + 18 + i * 14} q 24 -7 48 0 t 48 0 t 48 0`}
+              fill="none"
+              stroke="var(--air-glow)"
+              stroke-opacity="0.45"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          ))
+        : [0, 1, 2].map((i) => (
+            <path
+              class="inlet__flow"
+              d={`M${g.inlet.x + 18 + i * 14} ${g.inlet.y + 20} q -7 16 0 32 t 0 32`}
+              fill="none"
+              stroke="var(--air-glow)"
+              stroke-opacity="0.45"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          ))
+    }
+  </g>
+
+  <!-- Airways feeding the sensing array -->
+  <g class="airways" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    {g.airways.map((d) => <path d={d} stroke="var(--darkfield-line)" stroke-width="16" />)}
+    {g.airways.map((d) => <path d={d} stroke="var(--darkfield)" stroke-width="10" />)}
+  </g>
+
+  <!-- Sensing chambers -->
+  <g class="chambers">
+    {
+      g.chambers.map((c, i) => (
+        <g class="chamber" data-chamber={c.moduleId} data-family={c.family} style={`--value:${values[i].toFixed(3)}`}>
+          <circle class="chamber__halo" cx={c.cx} cy={c.cy} r={c.r * 1.45} fill={`url(#${id(`halo-${c.family}`)})`} />
+          <circle class="chamber__wall" cx={c.cx} cy={c.cy} r={c.r} />
+          {c.cells.map((cell) => (
+            <circle class="chamber__cell" cx={cell.cx} cy={cell.cy} r={cell.r} />
+          ))}
+          <text class="chamber__label" x={c.cx} y={c.cy + c.r - 7} text-anchor="middle">
+            {c.label}
+          </text>
+        </g>
+      ))
+    }
+  </g>
+
+  <!-- Signature -->
+  <g class="signature">
+    {[0.5, 1].map((k) => <circle cx={cx} cy={cy} r={r * k} fill="none" stroke="var(--darkfield-line)" stroke-width="1" />)}
+    {
+      g.signature.spokes.map((s) => (
+        <line x1={cx} y1={cy} x2={cx + Math.cos(s.angle) * r} y2={cy + Math.sin(s.angle) * r} stroke="var(--darkfield-line)" stroke-width="1" />
+      ))
+    }
+    <polygon class="signature__ref" points={pointsAttr(ref)} data-sig-ref></polygon>
+    <polygon class="signature__shape" points={pointsAttr(current)} data-sig-shape></polygon>
+    {
+      g.signature.spokes.map((s, i) => (
+        <circle class="signature__dot" data-family={s.family} data-sig-dot={s.moduleId} cx={current[i].x} cy={current[i].y} r="5" />
+      ))
+    }
+    {
+      g.signature.spokes.map((s) => (
+        <text
+          class="signature__label"
+          data-family={s.family}
+          x={cx + Math.cos(s.angle) * (r + 17)}
+          y={cy + Math.sin(s.angle) * (r + 17) + 5}
+          text-anchor="middle"
+        >
+          {s.label}
+        </text>
+      ))
+    }
+  </g>
+
+  {
+    g.labels.map((l) => (
+      <text class="stage-label" x={l.x} y={l.y} text-anchor={l.anchor}>
+        {l.text}
+      </text>
+    ))
+  }
+
+  <g class="particles" data-particles aria-hidden="true"></g>
+</svg>
+
+<style>
+  .instrument-svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    font-family: var(--font-sans);
+  }
+
+  .chamber {
+    --value: 0;
+  }
+
+  .chamber__halo {
+    opacity: calc(var(--value) * 1.1);
+  }
+
+  .chamber__wall {
+    fill: var(--darkfield-2);
+    stroke: var(--family-glow);
+    stroke-opacity: calc(0.35 + var(--value) * 0.65);
+    stroke-width: 2;
+  }
+
+  .chamber__cell {
+    fill: var(--family-glow);
+    fill-opacity: calc(0.1 + var(--value) * 0.9);
+  }
+
+  .chamber__label {
+    fill: var(--on-dark-2);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .signature__ref {
+    fill: none;
+    stroke: var(--on-dark-3);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+  }
+
+  .signature__shape {
+    fill: color-mix(in srgb, var(--air-glow) 22%, transparent);
+    stroke: var(--on-dark);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  .signature__dot {
+    fill: var(--family-glow);
+    stroke: var(--darkfield);
+    stroke-width: 2;
+  }
+
+  .signature__label {
+    fill: var(--family-glow);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .stage-label {
+    fill: var(--on-dark-2);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .particles :global(.particle) {
+    fill: var(--family-glow);
+  }
+</style>

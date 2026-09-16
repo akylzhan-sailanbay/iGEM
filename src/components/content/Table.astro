@@ -1,0 +1,36 @@
+---
+/**
+ * Scrollable, keyboard-reachable wrapper for a data table. Pass the <table> as children.
+ */
+interface Props {
+  label: string;
+  /** Shown above the table; omit when the surrounding text already introduces it */
+  note?: string;
+}
+const { label, note } = Astro.props;
+---
+
+<div class="table-block">
+  {note && <p class="table-block__note">{note}</p>}
+  <div class="table-scroll" role="region" aria-label={label} tabindex="0">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .table-block {
+    margin-block: var(--sp-6);
+  }
+
+  .table-block__note {
+    max-width: var(--measure);
+    margin-bottom: var(--sp-3);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .table-scroll {
+    padding-bottom: 2px;
+  }
+</style>

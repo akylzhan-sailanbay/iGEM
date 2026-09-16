@@ -1,0 +1,183 @@
+---
+import ChapterLayout from '../layouts/ChapterLayout.astro';
+import Section from '../components/content/Section.astro';
+import Cite from '../components/content/Cite.astro';
+import Note from '../components/content/Note.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import FigureStrip from '../components/content/FigureStrip.astro';
+import Table from '../components/content/Table.astro';
+import StatusPill from '../components/content/StatusPill.astro';
+import ScreeningPathway from '../components/science/ScreeningPathway.astro';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'global-burden', title: 'The global burden' },
+  { id: 'kazakhstan', title: 'Lung cancer in Kazakhstan' },
+  { id: 'why-stage-matters', title: 'Why stage at diagnosis matters' },
+  { id: 'why-screening-is-hard-to-reach', title: 'Why screening is hard to reach' },
+  { id: 'what-would-have-to-be-true', title: 'What would have to be true' },
+];
+
+const refs = ['ji2025', 'akhmedullin2024', 'avizova2026', 'nlst2011', 'dekoning2020', 'wilson1968'];
+---
+
+<ChapterLayout
+  slug="problem"
+  toc={toc}
+  refs={refs}
+  brief={[
+    'Lung cancer is the most common cancer and the leading cause of cancer death worldwide.',
+    'In Kazakhstan it caused 16% of cancer deaths between 2014 and 2022, and most patients are diagnosed at an advanced stage.',
+    'CT screening saves lives in trials, but it depends on scanners, specialists and follow-up care that are unevenly spread.',
+  ]}
+>
+  <Section id="global-burden" title="The global burden">
+    <p>
+      In 2022 an estimated 2.48 million people were diagnosed with lung cancer and 1.82 million died from it. That makes
+      it both the most frequently diagnosed cancer and the leading cause of cancer death, in countries at every level of
+      development.<Cite id="ji2025" />
+    </p>
+    <FigureStrip
+      items={[
+        { value: '2.48', unit: 'million', label: 'new lung cancer cases worldwide in 2022', refId: 'ji2025' },
+        { value: '1.82', unit: 'million', label: 'deaths from lung cancer worldwide in 2022', refId: 'ji2025' },
+        { value: '18.7', unit: '%', label: 'of all cancer deaths, about one in five', refId: 'ji2025' },
+      ]}
+    />
+  </Section>
+
+  <Section id="kazakhstan" title="Lung cancer in Kazakhstan">
+    <p>
+      A nationwide analysis of 123,622 cancer deaths recorded in Kazakhstan between 2014 and 2022 found that cancers of
+      the trachea, bronchus and lung accounted for 16.01% of them, the largest share of any cancer site in the
+      study.<Cite id="akhmedullin2024" />
+    </p>
+    <p>
+      The picture at diagnosis is just as important. In a national cohort of 13,402 lung cancer patients diagnosed from
+      2019 to 2023, stage III was the most common stage recorded (47.5%), and median overall survival was 167 days.
+      Three out of four patients died during follow-up.<Cite id="avizova2026" />
+    </p>
+    <FigureStrip
+      items={[
+        { value: '16.01', unit: '%', label: 'of cancer deaths in Kazakhstan, 2014–2022, were lung cancers', refId: 'akhmedullin2024' },
+        { value: '47.5', unit: '%', label: 'of patients in a national 2019–2023 cohort were recorded at stage III', refId: 'avizova2026' },
+        { value: '167', unit: 'days', label: 'median overall survival in the same cohort', refId: 'avizova2026' },
+      ]}
+    />
+    <Placeholder title="Regional access to lung cancer screening and diagnosis in Kazakhstan" where="src/pages/problem.astro">
+      <ul>
+        <li>Current national screening policy for lung cancer, if any, with an official source.</li>
+        <li>Where CT scanners and thoracic oncology services are located, and travel distances for rural residents.</li>
+        <li>What clinicians interviewed by the team said about late presentation.</li>
+      </ul>
+    </Placeholder>
+  </Section>
+
+  <Section id="why-stage-matters" title="Why stage at diagnosis matters">
+    <p>
+      The strongest evidence that finding lung cancer earlier saves lives comes from randomised screening trials. In the
+      US National Lung Screening Trial, 53,454 people at high risk were screened with either low-dose CT or chest X-ray.
+      Low-dose CT reduced deaths from lung cancer by 20%.<Cite id="nlst2011" /> The European NELSON trial also found lower
+      lung cancer mortality with CT screening.<Cite id="dekoning2020" />
+    </p>
+    <Note kind="context">
+      <p>
+        These trials screened people selected for high risk, mostly by age and smoking history. The benefit applies to
+        that kind of programme, not to testing everyone.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="why-screening-is-hard-to-reach" title="Why screening is hard to reach">
+    <p>
+      A screening programme is a chain of steps, and each step depends on people and equipment being available where the
+      patient lives. CT screening also produces many positive results that turn out not to be cancer: in the NLST, 96.4%
+      of positive low-dose CT screens were false positives, each of which needed follow-up.<Cite id="nlst2011" />
+    </p>
+
+    <ScreeningPathway
+      label="A lung cancer screening pathway, with the proposed breath-based triage step"
+      steps={[
+        {
+          title: 'Identify people at high risk',
+          detail: 'Usually by age and smoking history.',
+          needs: 'Primary care records and outreach',
+        },
+        {
+          title: 'Breath-based triage',
+          detail: 'A low-cost first test that could help prioritise who is sent for CT.',
+          needs: 'A validated test, which does not exist yet',
+          proposed: true,
+        },
+        {
+          title: 'Low-dose CT scan',
+          detail: 'The screening test proven in randomised trials.',
+          needs: 'CT scanners and trained radiologists',
+        },
+        {
+          title: 'Diagnostic work-up',
+          detail: 'Further imaging and biopsy for suspicious findings.',
+          needs: 'Specialist centres',
+        },
+        {
+          title: 'Treatment',
+          detail: 'Earlier stage usually means more treatment options.',
+          needs: 'Oncology services',
+        },
+      ]}
+    />
+
+    <p>
+      OncoNose does not try to replace CT. The question is whether a cheap, portable first step could help health
+      systems decide who most needs a scan, especially where scanners are far away. That is a hypothesis, and
+      the <a href={href('safety-and-security')}>limitations</a> are serious.
+    </p>
+  </Section>
+
+  <Section id="what-would-have-to-be-true" title="What would have to be true">
+    <p>
+      In 1968, Wilson and Jungner set out principles for when screening for a disease is justified, and they are still
+      the starting point for screening decisions.<Cite id="wilson1968" /> We use a selection of them as a checklist for
+      OncoNose, and we are honest that most answers are still open.
+    </p>
+
+    <Table label="Screening principles applied to OncoNose">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Principle</th>
+            <th scope="col">For lung cancer</th>
+            <th scope="col">For a breath-based test like OncoNose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">The condition is an important health problem</th>
+            <td><StatusPill kind="met" /></td>
+            <td>Applies to any lung cancer screening, including ours.</td>
+          </tr>
+          <tr>
+            <th scope="row">There is a recognisable early stage</th>
+            <td><StatusPill kind="met" /></td>
+            <td>Early-stage disease exists; whether breath patterns change at that stage is an <StatusPill kind="open" label="open question" />.</td>
+          </tr>
+          <tr>
+            <th scope="row">There is a suitable test</th>
+            <td><StatusPill kind="met" label="Low-dose CT" /></td>
+            <td><StatusPill kind="unmet" /> No validated biological breath test exists. This is what the project investigates.</td>
+          </tr>
+          <tr>
+            <th scope="row">The test is acceptable to the population</th>
+            <td><StatusPill kind="open" /></td>
+            <td>Breathing into a device is non-invasive. Acceptability still has to be asked, not assumed.</td>
+          </tr>
+          <tr>
+            <th scope="row">Facilities exist for diagnosis and treatment</th>
+            <td><StatusPill kind="open" /></td>
+            <td>A triage test is only useful if referrals lead somewhere. See <a href={href('human-practices')}>Human practices</a>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </Table>
+  </Section>
+</ChapterLayout>

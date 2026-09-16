@@ -1,0 +1,116 @@
+---
+import { href } from '../../lib/paths';
+import { site } from '../../data/site';
+---
+
+<section class="hero container" aria-labelledby="hero-title">
+  <h1 id="hero-title" class="hero__wordmark" data-breathing-wordmark>OncoNose</h1>
+  <p class="hero__tagline">{site.tagline}</p>
+
+  <p class="hero__intro">
+    Lung cancer is usually found too late. OncoNose asks whether engineered biological sensors can read the volatile
+    compounds carried in a single breath, and turn them into a pattern that helps decide who needs a closer look.
+  </p>
+
+  <div class="hero__aside">
+    <div class="hero__actions">
+      <a class="button" href={href('how-it-works')}>See how it works</a>
+      <a class="button button--quiet" href={href('judging')}>Judging guide</a>
+    </div>
+    <p class="hero__caveat">
+      A student project from {site.country}, built for iGEM {site.year}. OncoNose is a screening concept and research
+      platform, not a validated diagnostic test.
+    </p>
+  </div>
+</section>
+
+<style>
+  .hero {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'mark' 'tag' 'intro' 'aside';
+    padding-top: clamp(var(--sp-6), 4.5vw, var(--sp-8));
+    padding-bottom: var(--sp-7);
+  }
+
+  /* The wordmark empties like a lung as the simulated breath leaves it */
+  .hero__wordmark {
+    --exhale: 0;
+    grid-area: mark;
+    margin: 0 0 0 -0.04em;
+    /* Sized to the column so the widest (resting) state always fits */
+    font-size: min(19cqi, 12rem);
+    min-width: 0;
+    font-weight: 680;
+    font-stretch: calc(115% - var(--exhale) * 28%);
+    letter-spacing: -0.045em;
+    line-height: 0.84;
+    color: var(--ink);
+    text-wrap: nowrap;
+  }
+
+  .hero__tagline {
+    grid-area: tag;
+    margin-top: var(--sp-5);
+    max-width: 22ch;
+    font-size: clamp(1.5rem, 1rem + 1.8vw, 2.4rem);
+    line-height: 1.16;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .hero__intro {
+    grid-area: intro;
+    max-width: 58ch;
+    margin-top: var(--sp-5);
+  }
+
+  .hero__aside {
+    grid-area: aside;
+    margin-top: var(--sp-5);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+
+  .hero__caveat {
+    max-width: 54ch;
+    margin-top: var(--sp-4);
+    padding-left: var(--sp-4);
+    border-left: 2px solid var(--rule-strong);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 60rem) {
+    .hero {
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      grid-template-areas: 'mark mark' 'tag tag' 'intro aside';
+      column-gap: var(--sp-8);
+    }
+
+    .hero__intro,
+    .hero__aside {
+      margin-top: var(--sp-6);
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .hero {
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-areas: 'mark tag' 'intro aside';
+      column-gap: var(--sp-8);
+    }
+
+    .hero__tagline {
+      align-self: end;
+      margin: 0 0 0.2em;
+    }
+  }
+</style>

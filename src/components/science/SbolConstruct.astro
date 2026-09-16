@@ -1,0 +1,183 @@
+---
+/**
+ * A genetic construct drawn with SBOL-style glyphs. Parts marked `placeholder` are drawn with a
+ * dashed outline, so an undecided part is never mistaken for a decided one.
+ */
+export type PartType = 'promoter' | 'rbs' | 'cds' | 'terminator' | 'operator';
+
+export interface ConstructPart {
+  type: PartType;
+  label: string;
+  placeholder?: boolean;
+  family?: 'metabolism' | 'oxidative' | 'inflammation';
+}
+
+interface Props {
+  parts: ConstructPart[];
+  label: string;
+}
+const { parts, label } = Astro.props;
+
+const widths: Record<PartType, number> = { promoter: 46, rbs: 24, cds: 104, terminator: 26, operator: 34 };
+const gap = 10;
+const startX = 8;
+
+let x = startX;
+const placed = parts.map((part, i) => {
+  const w = widths[part.type];
+  const item = { ...part, x, w, index: i + 1 };
+  x += w + gap;
+  return item;
+});
+const totalWidth = x - gap + startX + 24;
+const baseline = 56;
+---
+
+<figure class="construct">
+  <svg viewBox={`0 0 ${totalWidth} 96`} style={`max-width:${Math.round(totalWidth * 1.7)}px`} role="img" aria-label={label}>
+    <line x1="0" y1={baseline} x2={totalWidth} y2={baseline} stroke="var(--ink)" stroke-width="2"></line>
+    {
+      placed.map((part) => (
+        <g
+          class:list={['part', `part--${part.type}`, { 'is-placeholder': part.placeholder }]}
+          data-family={part.family}
+        >
+          {part.type === 'promoter' && (
+            <path d={`M${part.x} ${baseline} V${baseline - 26} H${part.x + part.w} l -9 -7 m 9 7 l -9 7`} fill="none" />
+          )}
+          {part.type === 'operator' && (
+            <rect x={part.x} y={baseline - 14} width={part.w} height="28" rx="3" />
+          )}
+          {part.type === 'rbs' && <path d={`M${part.x} ${baseline} a ${part.w / 2} ${part.w / 2} 0 0 1 ${part.w} 0 Z`} />}
+          {part.type === 'cds' && (
+            <path
+              d={`M${part.x} ${baseline - 16} H${part.x + part.w - 18} L${part.x + part.w} ${baseline} L${part.x + part.w - 18} ${baseline + 16} H${part.x} Z`}
+            />
+          )}
+          {part.type === 'terminator' && (
+            <path d={`M${part.x + part.w / 2} ${baseline} V${baseline - 24} M${part.x} ${baseline - 24} H${part.x + part.w}`} fill="none" />
+          )}
+          <text class="part__index" x={part.x + part.w / 2} y={baseline + 32} text-anchor="middle">
+            {part.index}
+          </text>
+        </g>
+      ))
+    }
+  </svg>
+  <ol class="construct__key">
+    {
+      placed.map((part) => (
+        <li class:list={{ 'is-placeholder': part.placeholder }} data-family={part.family}>
+          <span class="construct__index">{part.index}</span>
+          {part.label}
+        </li>
+      ))
+    }
+  </ol>
+  <figcaption>
+    <slot />
+  </figcaption>
+</figure>
+
+<style>
+  .construct {
+    margin: var(--sp-5) 0;
+    padding: var(--sp-5) var(--sp-4) var(--sp-4);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-figure);
+    background: var(--paper-raised);
+  }
+
+  .construct svg {
+    width: 100%;
+    overflow: visible;
+    height: auto;
+    max-width: 44rem;
+    font-family: var(--font-sans);
+  }
+
+  .part {
+    --part-color: var(--ink);
+    fill: var(--part-color);
+    stroke: var(--part-color);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  .part[data-family] {
+    --part-color: var(--family-ink);
+  }
+
+  .part--promoter,
+  .part--terminator {
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .part--cds,
+  .part--rbs,
+  .part--operator {
+    fill: color-mix(in srgb, var(--part-color) 16%, var(--paper-raised));
+  }
+
+  .is-placeholder {
+    stroke-dasharray: 5 4;
+    opacity: 0.75;
+  }
+
+  .part__index {
+    fill: var(--ink-2);
+    stroke: none;
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .construct__key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-5);
+    margin: var(--sp-4) 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .construct__key li {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .construct__key li[data-family] {
+    color: var(--family-ink);
+  }
+
+  .construct__key .is-placeholder,
+  .construct__key li.is-placeholder {
+    color: var(--ink-3);
+    font-style: italic;
+  }
+
+  .construct__index {
+    display: inline-grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    font-size: 0.7rem;
+    font-weight: 650;
+    font-style: normal;
+    flex: none;
+  }
+
+  .construct figcaption {
+    margin-top: var(--sp-3);
+    max-width: var(--measure);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+</style>

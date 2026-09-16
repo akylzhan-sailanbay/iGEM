@@ -1,0 +1,138 @@
+---
+import { chapters } from '../../data/chapters';
+import { href } from '../../lib/paths';
+
+interface Props {
+  current: string;
+}
+const { current } = Astro.props;
+const index = chapters.findIndex((c) => c.slug === current);
+---
+
+<nav class="rail" aria-label="Project chapters">
+  <p class="rail__count sans">Chapter {index + 1} of {chapters.length}</p>
+  <ol class="rail__list" data-rail>
+    {
+      chapters.map((chapter, i) => (
+        <li class:list={['rail__item', { 'is-done': i < index, 'is-current': i === index }]}>
+          <a href={href(chapter.slug)} aria-current={i === index ? 'page' : undefined}>
+            <span class="rail__dot" aria-hidden="true" />
+            <span class="rail__num">{i + 1}</span>
+            <span class="rail__label">{chapter.nav}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .rail {
+    font-family: var(--font-sans);
+  }
+
+  .rail__count {
+    font-size: var(--text-xs);
+    color: var(--ink-2);
+    margin-bottom: var(--sp-2);
+  }
+
+  .rail__list {
+    display: flex;
+    margin: 0;
+    padding: 0 0 var(--sp-2);
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .rail__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rail__item {
+    position: relative;
+    flex: 1 0 auto;
+    scroll-snap-align: center;
+  }
+
+  /* Each item draws the line from its dot to the next dot */
+  .rail__item::before {
+    content: '';
+    position: absolute;
+    top: calc(0.5rem - 0.75px);
+    left: 0.5rem;
+    right: -0.5rem;
+    height: 1.5px;
+    background: var(--rule-strong);
+  }
+
+  .rail__item:last-child::before {
+    display: none;
+  }
+
+  .rail__item.is-done::before {
+    background: var(--ink);
+  }
+
+  .rail__item a {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 0.3rem;
+    row-gap: 0.4rem;
+    padding-right: 1.25rem;
+    text-decoration: none;
+    color: var(--ink-2);
+    font-size: var(--text-xs);
+    line-height: 1.2;
+    white-space: nowrap;
+    border-radius: 4px;
+  }
+
+  .rail__dot {
+    grid-column: 1 / -1;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1.5px solid var(--rule-strong);
+  }
+
+  .is-done .rail__dot {
+    background: var(--ink);
+    border-color: var(--ink);
+    transform: scale(0.6);
+  }
+
+  .is-current .rail__dot {
+    background: var(--ink);
+    border-color: var(--ink);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--air) 45%, transparent);
+  }
+
+  .rail__num {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+  }
+
+  .is-current a {
+    color: var(--ink);
+    font-weight: 650;
+  }
+
+  .rail__item a:hover .rail__label {
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  // Keep the current chapter visible when the rail scrolls horizontally on small screens
+  document.querySelectorAll<HTMLElement>('[data-rail]').forEach((rail) => {
+    const current = rail.querySelector<HTMLElement>('.is-current');
+    if (current && rail.scrollWidth > rail.clientWidth) {
+      rail.scrollLeft = current.offsetLeft - rail.clientWidth / 2 + current.clientWidth / 2;
+    }
+  });
+</script>

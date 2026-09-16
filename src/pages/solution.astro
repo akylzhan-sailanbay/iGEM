@@ -1,0 +1,220 @@
+---
+import ChapterLayout from '../layouts/ChapterLayout.astro';
+import Section from '../components/content/Section.astro';
+import Cite from '../components/content/Cite.astro';
+import Note from '../components/content/Note.astro';
+import Figure from '../components/content/Figure.astro';
+import Table from '../components/content/Table.astro';
+import ConceptFlow from '../components/science/ConceptFlow.astro';
+import { families } from '../data/signals';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'the-idea', title: 'The idea in one band' },
+  { id: 'what-breath-carries', title: 'What a breath carries' },
+  { id: 'three-families', title: 'Three signal families' },
+  { id: 'from-electronic-to-biological', title: 'From electronic noses to biological ones' },
+  { id: 'how-it-compares', title: 'How the approaches compare' },
+  { id: 'what-we-expect', title: 'What we expect, and what we do not claim' },
+];
+
+const refs = ['phillips1999', 'machado2005', 'peng2009', 'hakim2012', 'radhika2007', 'nlst2011'];
+---
+
+<ChapterLayout
+  slug="solution"
+  toc={toc}
+  refs={refs}
+  brief={[
+    'OncoNose is an array of engineered biological sensing modules that respond to compounds in exhaled breath.',
+    'The modules are deliberately cross-reactive, so the useful information is the pattern across the array rather than any single signal.',
+    'Breath sensing with chemical sensor arrays is established in research; doing it with engineered biology is what we are testing.',
+  ]}
+>
+  <Section id="the-idea" title="The idea in one band">
+    <p>
+      An electronic nose does not identify single molecules the way a mass spectrometer does. It uses an array of
+      sensors that each respond to many compounds, and reads the combined pattern.<Cite ids={['machado2005', 'peng2009']} /> OncoNose keeps that
+      idea and changes the sensor: instead of chemical films, each element is a living, engineered sensing module.
+    </p>
+    <Figure
+      caption="The concept from breath to screening decision. Each stage is explained step by step in How it works."
+      surface="none"
+    >
+      <ConceptFlow />
+    </Figure>
+  </Section>
+
+  <Section id="what-breath-carries" title="What a breath carries">
+    <Note kind="definition" title="Volatile organic compounds (VOCs)">
+      <p>
+        Small carbon-based molecules that evaporate easily at body temperature. Hundreds of them are present in exhaled
+        breath, at concentrations usually measured in parts per billion.
+      </p>
+    </Note>
+    <p>
+      Breath has been studied as a source of cancer markers since the 1990s. An early cross-sectional study reported
+      differences in breath VOC profiles between people with and without lung cancer,<Cite id="phillips1999" /> and a
+      later review catalogued the compounds reported across studies together with the biochemical pathways that might
+      produce them, including oxidative damage to membrane lipids and altered tumour metabolism.<Cite id="hakim2012" />
+    </p>
+    <Note kind="limitation" title="The literature is not a settled answer">
+      <p>
+        Published studies differ in which compounds they report, how breath was collected and how many people took part.
+        No single breath biomarker is accepted for lung cancer screening today. OncoNose treats these compound classes as
+        a starting point for sensor design, not as proven markers.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="three-families" title="Three signal families">
+    <p>
+      We group candidate compounds into three families, chosen because they correspond to processes described in the
+      breath literature.<Cite id="hakim2012" /> The same three colours are used for these families everywhere on this
+      site.
+    </p>
+    <ul class="families">
+      {
+        families.map((family) => (
+          <li data-family={family.id}>
+            <span class="families__swatch" aria-hidden="true" />
+            <div>
+              <h3>{family.name}</h3>
+              <p>{family.why}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+    <p>
+      Because one process can affect many compounds, and one compound can come from many processes, no single module can
+      carry the answer. The array is designed so that each module responds mostly to one family and a little to the
+      others. That overlap is what turns six numbers into a shape.
+    </p>
+  </Section>
+
+  <Section id="from-electronic-to-biological" title="From electronic noses to biological ones">
+    <p>
+      Sensor-array approaches have been tested on breath before. In one feasibility study, an electronic nose separated
+      the breath of people with lung cancer from controls, reporting 71.4% sensitivity and 91.9% specificity in a
+      validation group of 76 people.<Cite id="machado2005" /> Another used gold nanoparticle sensors to distinguish breath
+      samples of lung cancer patients from healthy controls.<Cite id="peng2009" /> Both are small research studies, not
+      screening programmes.
+    </p>
+    <p>
+      Biology already solves the sensing problem: receptors detect small molecules and cells convert that into a
+      response. Those parts can be engineered. A yeast strain has been built carrying the main components of the
+      mammalian olfactory signalling pathway, with receptor activation coupled to expression of a fluorescent
+      reporter, and used to screen for receptors responding to a specific chemical.<Cite id="radhika2007" />
+    </p>
+    <Note kind="hypothesis" title="Why this could be worth doing">
+      <p>
+        Biological sensing elements can be produced by growing cells rather than manufactured, can be swapped without
+        redesigning the device, and report through signals such as fluorescence that simple optics can read. Whether
+        those advantages survive contact with real breath samples is an open question, and it is the one this project
+        exists to test.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="how-it-compares" title="How the approaches compare">
+    <Table label="Comparison of lung cancer screening and breath sensing approaches" note="Evidence level refers to lung cancer specifically.">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Approach</th>
+            <th scope="col">What it measures</th>
+            <th scope="col">What it needs</th>
+            <th scope="col">Evidence for lung cancer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Low-dose CT</th>
+            <td>Anatomy: nodules in the lung</td>
+            <td>CT scanner, radiologist, follow-up pathway</td>
+            <td>Randomised trials showing reduced mortality<Cite id="nlst2011" /></td>
+          </tr>
+          <tr>
+            <th scope="row">Electronic nose</th>
+            <td>Pattern across chemical sensors</td>
+            <td>Sensor array, controlled sampling, trained model</td>
+            <td>Small feasibility studies<Cite ids={['machado2005', 'peng2009']} /></td>
+          </tr>
+          <tr>
+            <th scope="row">OncoNose (concept)</th>
+            <td>Pattern across engineered biological modules</td>
+            <td>Engineered cells, an optical reader, controlled sampling, trained model</td>
+            <td>None yet. See <a href={href('results')}>Results</a>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </Table>
+  </Section>
+
+  <Section id="what-we-expect" title="What we expect, and what we do not claim">
+    <p>We state our expectations as hypotheses so they can be tested and, if wrong, discarded.</p>
+    <Note kind="hypothesis" title="H1. Modules respond in a measurable, repeatable way">
+      <p>Each module produces a dose-dependent reporter signal to its target compound class at concentrations we can deliver in the lab.</p>
+    </Note>
+    <Note kind="hypothesis" title="H2. The array separates mixtures that single modules cannot">
+      <p>Cross-reactive modules produce patterns that distinguish compound mixtures which look similar to any one module.</p>
+    </Note>
+    <Note kind="limitation" title="What OncoNose is not">
+      <p>
+        It is not a diagnostic test, it has not been used on human breath samples, and a pattern is not a disease. Any
+        future use would need clinical validation far beyond what an iGEM project can do. The{' '}
+        <a href={href('safety-and-security')}>safety and ethics chapter</a> sets out those limits in detail.
+      </p>
+    </Note>
+  </Section>
+</ChapterLayout>
+
+<style>
+  .families {
+    display: grid;
+    gap: var(--sp-4);
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .families li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--sp-4);
+    align-items: start;
+    padding: var(--sp-4);
+    border-radius: var(--r-figure);
+    background: var(--family-tint);
+  }
+
+  .families__swatch {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.3rem;
+    border-radius: 50%;
+    background: var(--family);
+    border: 1.5px solid var(--family-ink);
+  }
+
+  .families h3 {
+    font-size: 1.05rem;
+    color: var(--family-ink);
+  }
+
+  .families p {
+    margin-top: var(--sp-2);
+    max-width: 62ch;
+  }
+
+  @media (min-width: 60rem) {
+    .families {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .families li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,99 @@
+---
+/**
+ * A visible, honest gap. Use wherever real project content is still missing.
+ * Search the codebase for "<Placeholder" to list every open item before the wiki freeze.
+ */
+interface Props {
+  /** What is missing, e.g. "Dose–response curves for each module" */
+  title: string;
+  /** Where the content should be added, e.g. "src/data/results.ts" */
+  where?: string;
+  kind?: 'text' | 'data' | 'image' | 'figure';
+  compact?: boolean;
+}
+const { title, where, kind = 'text', compact = false } = Astro.props;
+
+const kindLabel = {
+  text: 'Content needed',
+  data: 'Data needed',
+  image: 'Image needed',
+  figure: 'Figure needed',
+} as const;
+---
+
+<div class:list={['placeholder', { 'placeholder--compact': compact }]} role="note" data-placeholder>
+  <p class="placeholder__label">{kindLabel[kind]}</p>
+  <p class="placeholder__title">{title}</p>
+  {
+    Astro.slots.has('default') && (
+      <div class="placeholder__body">
+        <slot />
+      </div>
+    )
+  }
+  {
+    where && (
+      <p class="placeholder__where">
+        Add it in <code>{where}</code>
+      </p>
+    )
+  }
+</div>
+
+<style>
+  .placeholder {
+    max-width: var(--measure);
+    padding: var(--sp-4) var(--sp-5);
+    border: 1.5px dashed var(--placeholder-edge);
+    border-radius: var(--r-figure);
+    background:
+      repeating-linear-gradient(
+        -45deg,
+        transparent 0 10px,
+        color-mix(in srgb, var(--placeholder-edge) 9%, transparent) 10px 11px
+      ),
+      var(--placeholder-bg);
+    color: var(--placeholder-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  .placeholder--compact {
+    padding: var(--sp-3) var(--sp-4);
+  }
+
+  .placeholder__label {
+    font-weight: 700;
+  }
+
+  .placeholder__title {
+    margin-top: 0.15rem;
+    color: var(--ink);
+    font-weight: 560;
+    font-size: 0.975rem;
+  }
+
+  .placeholder__body {
+    margin-top: var(--sp-2);
+    color: var(--ink-2);
+  }
+
+  .placeholder__body :global(ul) {
+    margin: 0;
+    padding-left: 1.1em;
+  }
+
+  .placeholder__where {
+    margin-top: var(--sp-2);
+  }
+
+  .placeholder code {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.85em;
+    padding: 0.05rem 0.3rem;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--placeholder-edge) 16%, transparent);
+    overflow-wrap: anywhere;
+  }
+</style>

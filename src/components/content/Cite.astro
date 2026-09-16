@@ -1,0 +1,93 @@
+---
+/**
+ * Inline citation. <Cite id="nlst2011" /> or <Cite ids={['peng2009', 'machado2005']} />
+ * Renders numbered links to the reference list, with a preview on hover and keyboard focus.
+ */
+import { formatReference, getReference, referenceNumber } from '../../data/references';
+import { href } from '../../lib/paths';
+
+interface Props {
+  id?: string;
+  ids?: string[];
+}
+const { id, ids = [] } = Astro.props;
+const all = id ? [id, ...ids] : ids;
+const items = all
+  .map((refId) => ({ ref: getReference(refId), n: referenceNumber(refId) }))
+  .sort((a, b) => a.n - b.n);
+---
+
+<sup class="cite"
+  >[{
+    items.map(({ ref, n }, i) => (
+      <>
+        {i > 0 && ', '}
+        <span class="cite__item">
+          <a href={href(`references#ref-${ref.id}`)} aria-label={`Reference ${n}: ${formatReference(ref)}`}>
+            {n}
+          </a>
+          <span class="cite__preview" aria-hidden="true">
+            <span class="cite__authors">{ref.authors}</span> {ref.title}. <em>{ref.venue}</em>, {ref.year}.
+          </span>
+        </span>
+      </>
+    ))
+  }]</sup
+>
+
+<style>
+  .cite {
+    font-family: var(--font-sans);
+    font-size: 0.68em;
+    font-weight: 560;
+    color: var(--ink-2);
+    white-space: nowrap;
+    margin-left: 0.1em;
+  }
+
+  .cite__item {
+    position: relative;
+  }
+
+  .cite a {
+    color: var(--air-ink);
+    text-decoration: none;
+    padding: 0 0.08em;
+  }
+
+  .cite a:hover {
+    text-decoration: underline;
+  }
+
+  .cite__preview {
+    position: absolute;
+    z-index: 30;
+    bottom: calc(100% + 0.6rem);
+    left: 50%;
+    width: min(22rem, 80vw);
+    padding: 0.7rem 0.85rem;
+    transform: translateX(-50%);
+    background: var(--darkfield);
+    color: var(--on-dark);
+    border-radius: var(--r-control);
+    box-shadow: var(--shadow-float);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: normal;
+    text-align: left;
+    display: none;
+    pointer-events: none;
+  }
+
+  .cite__authors {
+    color: var(--on-dark-2);
+  }
+
+  @media (hover: hover) and (min-width: 40rem) {
+    .cite__item:hover .cite__preview,
+    .cite__item:focus-within .cite__preview {
+      display: block;
+    }
+  }
+</style>

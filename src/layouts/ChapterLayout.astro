@@ -1,0 +1,127 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import ChapterRail from '../components/layout/ChapterRail.astro';
+import PageToc, { type TocItem } from '../components/layout/PageToc.astro';
+import PrevNext from '../components/layout/PrevNext.astro';
+import PageSources from '../components/content/PageSources.astro';
+import { getChapter } from '../data/chapters';
+
+interface Props {
+  slug: string;
+  toc: TocItem[];
+  /** Key takeaways shown next to the title. Keep to three or four short sentences. */
+  brief: string[];
+  /** Reference ids cited on this page, listed at the bottom */
+  refs?: string[];
+}
+
+const { slug, toc, brief, refs = [] } = Astro.props;
+const chapter = getChapter(slug);
+const tocWithSources = refs.length ? [...toc, { id: 'sources', title: 'Sources' }] : toc;
+---
+
+<BaseLayout title={chapter.nav} description={chapter.description}>
+  <header class="chapter-head container">
+    <ChapterRail current={slug} />
+    <div class="chapter-head__grid">
+      <div class="chapter-head__title">
+        <p class="chapter-head__question">{chapter.question}</p>
+        <h1>{chapter.title}</h1>
+      </div>
+      <aside class="in-brief" aria-labelledby="in-brief-title">
+        <h2 id="in-brief-title" class="in-brief__title">In brief</h2>
+        <ul>
+          {brief.map((point) => <li>{point}</li>)}
+        </ul>
+      </aside>
+    </div>
+  </header>
+
+  <div class="chapter-body container">
+    <aside class="chapter-body__toc">
+      <PageToc items={tocWithSources} />
+    </aside>
+    <div class="chapter-body__content">
+      <slot />
+      {refs.length > 0 && <PageSources ids={refs} />}
+    </div>
+  </div>
+
+  <div class="container">
+    <PrevNext current={slug} />
+  </div>
+</BaseLayout>
+
+<style>
+  .chapter-head {
+    padding-top: var(--sp-6);
+  }
+
+  .chapter-head__grid {
+    display: grid;
+    gap: var(--sp-6);
+    padding-block: var(--sp-7) var(--sp-8);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  @media (min-width: 60rem) {
+    .chapter-head__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      align-items: end;
+      gap: var(--sp-8);
+    }
+  }
+
+  .chapter-head__question {
+    font-style: italic;
+    font-size: var(--text-lg);
+    color: var(--ink-2);
+    margin-bottom: var(--sp-3);
+  }
+
+  .chapter-head h1 {
+    max-width: 18ch;
+  }
+
+  .in-brief {
+    font-family: var(--font-sans);
+    border-left: 3px solid var(--ink);
+    padding-left: var(--sp-5);
+  }
+
+  .in-brief__title {
+    font-size: var(--text-sm);
+    font-weight: 650;
+    letter-spacing: 0;
+    margin-bottom: var(--sp-3);
+  }
+
+  .in-brief ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--sp-3);
+    font-size: 0.975rem;
+    line-height: 1.45;
+  }
+
+
+  .chapter-body {
+    display: grid;
+    gap: var(--sp-5);
+    padding-top: var(--sp-6);
+  }
+
+  @media (min-width: 64rem) {
+    .chapter-body {
+      grid-template-columns: 13.5rem minmax(0, 1fr);
+      gap: var(--sp-8);
+      padding-top: var(--sp-8);
+    }
+  }
+
+  .chapter-body__content {
+    min-width: 0;
+  }
+</style>

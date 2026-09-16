@@ -1,0 +1,124 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import Section from '../components/content/Section.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import Table from '../components/content/Table.astro';
+import { areas } from '../data/team';
+import { site } from '../data/site';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'team-work', title: 'What the team did' },
+  { id: 'outside-help', title: 'Help from outside the team' },
+  { id: 'igem-form', title: 'Official iGEM attributions form' },
+  { id: 'this-website', title: 'This website' },
+];
+---
+
+<PageLayout
+  title="Attributions"
+  lede="Who did which part of this project, and where we had help. iGEM asks every team to be explicit about this, and it is the honest thing to do anyway."
+  toc={toc}
+>
+  <Section id="team-work" title="What the team did">
+    <p>
+      Work areas are listed below. The people on each one are recorded on the{' '}
+      <a href={href('team')}>team page</a>, and will be repeated here per contribution once the team list is filled in.
+    </p>
+    <Table label="Work areas">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Area</th>
+            <th scope="col">What it covers</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            areas.map((area) => (
+              <tr>
+                <th scope="row">{area.name}</th>
+                <td>{area.detail}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </Table>
+    <Placeholder title="Contribution record per person" where="src/data/team.ts">
+      <ul>
+        <li>What each team member personally did, in their own words.</li>
+        <li>Which experiments, analyses, interviews or pages each person produced.</li>
+      </ul>
+    </Placeholder>
+  </Section>
+
+  <Section id="outside-help" title="Help from outside the team">
+    <p>
+      Anything done by someone who is not a student team member belongs here: advice, laboratory training, equipment
+      access, protocols, sequencing, translation, hosting, funding.
+    </p>
+    <Placeholder title="External contributions" where="src/pages/attributions.astro">
+      <ul>
+        <li>Advisors and instructors, and exactly what they advised on.</li>
+        <li>Laboratory staff who trained the team or ran equipment.</li>
+        <li>Clinicians, patients and organisations who gave time for human practices work.</li>
+        <li>Sponsors and what they provided.</li>
+        <li>Any work done by people outside the team, clearly separated from the team’s own work.</li>
+      </ul>
+    </Placeholder>
+  </Section>
+
+  <Section id="igem-form" title="Official iGEM attributions form">
+    <p>
+      iGEM collects attributions through its own form, and requires teams to make it reachable from the wiki. That form
+      is the authoritative record; this page is the readable version of it.
+    </p>
+    <Placeholder title="Link or embed for the official form" where="src/pages/attributions.astro">
+      <ul>
+        <li>Add the team’s attributions form from teams.igem.org once it is submitted.</li>
+        <li>Check the current iGEM requirements: <a href={site.links.responsibility} rel="noopener">responsibility.igem.org</a></li>
+      </ul>
+    </Placeholder>
+  </Section>
+
+  <Section id="this-website" title="This website">
+    <p>
+      The site is a static build with no external dependencies at run time, which is what iGEM requires: every font,
+      script, style and image is served from the wiki itself rather than from another service.
+    </p>
+    <Table label="What this website is built from">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Part</th>
+            <th scope="col">What we used</th>
+            <th scope="col">Licence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Site framework</th>
+            <td>Astro, building static HTML</td>
+            <td>MIT</td>
+          </tr>
+          <tr>
+            <th scope="row">Typefaces</th>
+            <td>Mona Sans and Source Serif 4, self-hosted</td>
+            <td>SIL Open Font License 1.1</td>
+          </tr>
+          <tr>
+            <th scope="row">Diagrams and charts</th>
+            <td>Written for this project as SVG, with no charting library</td>
+            <td>Part of this site</td>
+          </tr>
+          <tr>
+            <th scope="row">Content</th>
+            <td>Written by the team; sources cited on <a href={href('references')}>References</a></td>
+            <td>CC BY 4.0</td>
+          </tr>
+        </tbody>
+      </table>
+    </Table>
+  </Section>
+</PageLayout>

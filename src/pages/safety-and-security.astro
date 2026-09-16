@@ -1,0 +1,297 @@
+---
+import ChapterLayout from '../layouts/ChapterLayout.astro';
+import Section from '../components/content/Section.astro';
+import Cite from '../components/content/Cite.astro';
+import Note from '../components/content/Note.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import Table from '../components/content/Table.astro';
+import StatusPill from '../components/content/StatusPill.astro';
+import ScreeningPathway from '../components/science/ScreeningPathway.astro';
+import { site } from '../data/site';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'limitations', title: 'What could make this not work' },
+  { id: 'lab-safety', title: 'Safety in the laboratory' },
+  { id: 'safety-by-design', title: 'Safety by design' },
+  { id: 'screening-ethics', title: 'The ethics of screening' },
+  { id: 'validation-path', title: 'The road to clinical validation' },
+  { id: 'security', title: 'Security and misuse' },
+];
+
+const refs = ['who2020', 'nlst2011', 'wilson1968', 'hakim2012'];
+
+const limitations = [
+  {
+    title: 'Breath is affected by much more than disease',
+    detail:
+      'Diet, smoking, medication, oral health, recent exercise and the air in the room all change breath composition. Without careful sampling and matched controls, those differences can look like a signal.',
+  },
+  {
+    title: 'Patterns overlap between conditions',
+    detail:
+      'Inflammation is common in many airway conditions. A pattern that differs from a reference does not say which process produced it, which is exactly what the confounder example in the home page simulation shows.',
+  },
+  {
+    title: 'Concentrations are very low',
+    detail:
+      'Breath compounds are typically present at parts per billion. Whether engineered cells can respond at those concentrations is unproven, and is the single biggest technical risk in the project.',
+  },
+  {
+    title: 'Living sensors vary',
+    detail:
+      'Cells change between batches and over time. Reproducibility across batches, days and operators has to be measured, not assumed.',
+  },
+  {
+    title: 'Small datasets mislead',
+    detail:
+      'With few samples and many modules, a model can separate groups by chance. Our analysis plan includes held-out data and shuffled-label controls for this reason.',
+  },
+  {
+    title: 'No clinical validity',
+    detail:
+      'Nothing in this project has been tested on human breath samples. Nothing here supports any claim about an individual person’s health.',
+  },
+];
+---
+
+<ChapterLayout
+  slug="safety-and-security"
+  toc={toc}
+  refs={refs}
+  brief={[
+    'The honest limitations come first: confounders, very low concentrations, variable living sensors and small datasets.',
+    'Laboratory work follows a risk-based approach and iGEM’s safety rules, with the specific organisms and procedures listed once they are fixed.',
+    'A screening concept carries ethical weight even before it works: false alarms, false reassurance, consent and follow-up capacity.',
+  ]}
+>
+  <Section
+    id="limitations"
+    title="What could make this not work"
+    lead="Every one of these is a reason the project might fail, and each is stated because a judge or a clinician would ask about it anyway."
+  >
+    <ol class="limitations">
+      {
+        limitations.map((limitation) => (
+          <li>
+            <h3>{limitation.title}</h3>
+            <p>{limitation.detail}</p>
+          </li>
+        ))
+      }
+    </ol>
+    <p>
+      Published breath studies differ in their findings and methods, and reviews of the field describe both the promise
+      and the difficulty of turning breath compounds into reliable markers.<Cite id="hakim2012" />
+    </p>
+  </Section>
+
+  <Section id="lab-safety" title="Safety in the laboratory">
+    <p>
+      Laboratory work follows a risk-based approach: identify what could cause harm, assess how likely and how serious
+      it is, and control it with procedures and equipment appropriate to that risk.<Cite id="who2020" /> Our
+      institutional biosafety rules and iGEM's safety policies apply on top of that, and no organism or procedure is
+      used before it has been checked against both.
+    </p>
+
+    <Table label="Biosafety information required before laboratory work">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Item</th>
+            <th scope="col">Status</th>
+            <th scope="col">Who confirms it</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Host organisms and their risk group</th>
+            <td><StatusPill kind="unmet" label="Not fixed yet" /></td>
+            <td>Team, with the institutional biosafety officer</td>
+          </tr>
+          <tr>
+            <th scope="row">Containment level and laboratory practices</th>
+            <td><StatusPill kind="planned" /></td>
+            <td>Host institution</td>
+          </tr>
+          <tr>
+            <th scope="row">iGEM safety forms and any check-in requests</th>
+            <td><StatusPill kind="planned" /></td>
+            <td>Team safety officer</td>
+          </tr>
+          <tr>
+            <th scope="row">Waste handling and decontamination</th>
+            <td><StatusPill kind="planned" /></td>
+            <td>Host institution</td>
+          </tr>
+          <tr>
+            <th scope="row">Training records for everyone in the laboratory</th>
+            <td><StatusPill kind="planned" /></td>
+            <td>Principal investigator</td>
+          </tr>
+        </tbody>
+      </table>
+    </Table>
+
+    <Placeholder title="Completed safety documentation" where="src/pages/safety-and-security.astro">
+      <ul>
+        <li>Chassis strains and their risk group classification.</li>
+        <li>Biosafety level of the laboratory and the practices in use.</li>
+        <li>Links to submitted iGEM safety forms.</li>
+        <li>Name and contact of the responsible safety officer.</li>
+      </ul>
+      <p>iGEM's current rules and forms: <a href={site.links.responsibility} rel="noopener">responsibility.igem.org</a></p>
+    </Placeholder>
+  </Section>
+
+  <Section id="safety-by-design" title="Safety by design">
+    <p>
+      A device concept that involves engineered cells and a human breath sample has to answer one question before
+      anything else: can the person and the organism be kept apart? These are the design commitments we are working
+      to, and the open questions attached to each.
+    </p>
+
+    <Note kind="hypothesis" title="Design commitments">
+      <ul>
+        <li>No engineered organism contacts the person being tested. The sample travels to the cells, never the reverse.</li>
+        <li>Cells stay inside a sealed cartridge that is disposed of as biological waste.</li>
+        <li>A cell-free implementation stays on the table precisely because it removes the containment question.</li>
+      </ul>
+    </Note>
+
+    <Note kind="limitation" title="Open questions we cannot answer yet">
+      <ul>
+        <li>What happens to a cartridge if it is damaged outside a laboratory.</li>
+        <li>Whether any containment strategy, such as auxotrophy or a kill switch, is needed for use outside a laboratory.</li>
+        <li>What shelf life and storage conditions the cells would need, and what that means for transport.</li>
+      </ul>
+    </Note>
+  </Section>
+
+  <Section id="screening-ethics" title="The ethics of screening">
+    <p>
+      Screening acts on people who feel well, so the harms of getting it wrong land on healthy people. In the NLST, 96.4%
+      of positive low-dose CT screens were false positives.<Cite id="nlst2011" /> Any screening test creates the same two
+      harms, and a cheap test creates them at scale.
+    </p>
+
+    <Table label="Ethical risks and how we would address them">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Risk</th>
+            <th scope="col">Who it falls on</th>
+            <th scope="col">How it must be handled</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">False alarm</th>
+            <td>Healthy people</td>
+            <td>Anxiety, cost and unnecessary imaging. Thresholds must be chosen with clinicians, not to make results look good.</td>
+          </tr>
+          <tr>
+            <th scope="row">False reassurance</th>
+            <td>People with early disease</td>
+            <td>A negative result must never be presented as an all-clear, in wording or in design.</td>
+          </tr>
+          <tr>
+            <th scope="row">Consent</th>
+            <td>Anyone giving a sample</td>
+            <td>Informed consent, ethics approval, and the right to withdraw, before a single breath sample is collected.</td>
+          </tr>
+          <tr>
+            <th scope="row">Data privacy</th>
+            <td>Participants</td>
+            <td>Breath data is health data. Stored without identifiers, with a stated retention period.</td>
+          </tr>
+          <tr>
+            <th scope="row">Equity</th>
+            <td>Communities with least access</td>
+            <td>Testing where no follow-up exists produces worry without benefit. Wilson and Jungner say the same.<Cite id="wilson1968" /></td>
+          </tr>
+        </tbody>
+      </table>
+    </Table>
+  </Section>
+
+  <Section id="validation-path" title="The road to clinical validation">
+    <p>
+      For context, this is the distance between where the project is and anything that could be used on a patient. We
+      are at the beginning of the first stage.
+    </p>
+    <ScreeningPathway
+      label="Stages from laboratory work to clinical use"
+      steps={[
+        { title: 'Analytical validation', detail: 'Does each module respond to defined compounds, repeatably?', needs: 'Laboratory work. This is where we are.' },
+        { title: 'Case–control study', detail: 'Do patterns differ between groups in carefully selected samples?', needs: 'Ethics approval and clinical partners' },
+        { title: 'Prospective cohort', detail: 'Does it still work in the population it would be used on?', needs: 'A funded clinical study' },
+        { title: 'Implementation study', detail: 'Does adding it to a pathway change outcomes, and at what cost?', needs: 'Health system participation' },
+        { title: 'Regulatory review', detail: 'Approval as a medical device before any clinical use.', needs: 'Regulatory submission' },
+      ]}
+    />
+    <Note kind="limitation" title="Where an iGEM project ends">
+      <p>
+        An iGEM team can do the first stage honestly and document it well. Everything after it needs clinical
+        infrastructure, funding and oversight that a student project does not have, and claiming otherwise would be the
+        real safety failure.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="security" title="Security and misuse">
+    <p>
+      We have considered whether this work could be misused. The sensing modules detect common metabolic compounds and
+      report with standard reporters; they do not confer pathogenicity, and they are not useful for harm on their own.
+      The realistic misuse risk is not biological but informational: a screening claim made without evidence could
+      cause people to delay real medical care. That is why the limitations above are stated as plainly as the idea is.
+    </p>
+    <Placeholder title="Security review by the team and advisors" where="src/pages/safety-and-security.astro">
+      <ul>
+        <li>Record the dual-use assessment once advisors have reviewed the final design.</li>
+        <li>Note any parts or organisms requiring special approval.</li>
+      </ul>
+    </Placeholder>
+    <p>
+      Our public communication follows the same rule as the rest of the site: OncoNose is described as a research
+      concept, and never as a test anyone should act on. See <a href={href('human-practices')}>Human practices</a> for how
+      that shapes what we say.
+    </p>
+  </Section>
+</ChapterLayout>
+
+<style>
+  .limitations {
+    display: grid;
+    gap: var(--sp-4);
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: limitation;
+  }
+
+  @media (min-width: 52rem) {
+    .limitations {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .limitations li {
+    counter-increment: limitation;
+    padding: var(--sp-4) var(--sp-5);
+    border-left: 3px solid var(--inflammation-ink);
+    background: var(--inflammation-tint);
+    border-radius: 0 var(--r-figure) var(--r-figure) 0;
+  }
+
+  .limitations h3 {
+    font-size: 1.05rem;
+    color: var(--inflammation-ink);
+  }
+
+  .limitations p {
+    margin-top: var(--sp-2);
+    font-size: 0.975rem;
+    line-height: 1.5;
+  }
+</style>

@@ -1,0 +1,121 @@
+---
+/**
+ * The sensing array as a table: what each module is meant to respond to, and what is still undecided.
+ * Everything here comes from src/data/signals.ts.
+ */
+import { families, modules, familyById } from '../../data/signals';
+import Table from '../content/Table.astro';
+
+const statusLabels = {
+  illustrative: 'Illustrative',
+  designed: 'Designed',
+  built: 'Built',
+  tested: 'Tested',
+} as const;
+---
+
+<Table
+  label="Sensing modules in the array"
+  note="Response strengths below are illustrative design targets used by the simulation on the home page, not measurements."
+>
+  <table class="data modules">
+    <thead>
+      <tr>
+        <th scope="col">Module</th>
+        <th scope="col">Primary family</th>
+        <th scope="col">Intended response strength</th>
+        <th scope="col">Sensing element</th>
+        <th scope="col">Reporter</th>
+        <th scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        modules.map((module) => (
+          <tr data-family={module.family}>
+            <th scope="row">
+              <span class="modules__chip">{module.label}</span>
+            </th>
+            <td>{familyById(module.family).name}</td>
+            <td>
+              <span class="bars">
+                {families.map((family) => (
+                  <span class="bars__row" data-family={family.id}>
+                    <span class="bars__name">{family.short}</span>
+                    <span class="bars__track">
+                      <span class="bars__fill" style={`--v:${module.sensitivity[family.id]}`} />
+                    </span>
+                    <span class="bars__value tabular">{Math.round(module.sensitivity[family.id] * 100)}</span>
+                  </span>
+                ))}
+              </span>
+            </td>
+            <td>{module.sensingElement ?? <span class="todo">To be confirmed</span>}</td>
+            <td>{module.reporter ?? <span class="todo">To be confirmed</span>}</td>
+            <td>{statusLabels[module.status]}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</Table>
+
+<style>
+  .modules th[scope='row'] {
+    padding-right: var(--sp-3);
+  }
+
+  .modules__chip {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--r-control);
+    background: var(--family-tint);
+    color: var(--family-ink);
+    font-weight: 700;
+  }
+
+  .bars {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 13rem;
+  }
+
+  .bars__row {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(3rem, 1fr) 2rem;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--text-xs);
+    color: var(--ink-2);
+  }
+
+  .bars__track {
+    height: 0.45rem;
+    border-radius: var(--r-pill);
+    background: var(--paper-sunk);
+  }
+
+  .bars__fill {
+    display: block;
+    height: 100%;
+    width: calc(var(--v) * 100%);
+    border-radius: var(--r-pill);
+    background: var(--family);
+    border: 1px solid var(--family-ink);
+  }
+
+  .bars__value {
+    text-align: right;
+  }
+
+  .todo {
+    color: var(--placeholder-ink);
+    background: var(--placeholder-bg);
+    border: 1px dashed var(--placeholder-edge);
+    border-radius: 4px;
+    padding: 0.05rem 0.4rem;
+    white-space: nowrap;
+  }
+</style>

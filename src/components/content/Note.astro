@@ -1,0 +1,108 @@
+---
+/**
+ * Marks the status of a statement so readers can tell evidence from expectation.
+ *   hypothesis  — something we expect but have not shown
+ *   limitation  — a known weakness or open problem
+ *   definition  — a term explained for non-specialists
+ *   context     — background that helps interpret the surrounding text
+ */
+interface Props {
+  kind: 'hypothesis' | 'limitation' | 'definition' | 'context';
+  title?: string;
+}
+const { kind, title } = Astro.props;
+
+const labels = {
+  hypothesis: 'Hypothesis to test',
+  limitation: 'Limitation',
+  definition: 'Definition',
+  context: 'Context',
+} as const;
+---
+
+<aside class:list={['note', `note--${kind}`]} aria-label={title ? `${labels[kind]}: ${title}` : labels[kind]}>
+  <p class="note__label">
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      {kind === 'hypothesis' && <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.4 2" />}
+      {kind === 'limitation' && <path d="M8 2.5 14 13H2Z M8 6.5v3.2 M8 11.2v.1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" />}
+      {kind === 'definition' && <path d="M3 3.5h7.5a2.5 2.5 0 0 1 2.5 2.5v6.5H5.5A2.5 2.5 0 0 1 3 10Z M3 10a2.5 2.5 0 0 1 2.5-2.5H13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />}
+      {kind === 'context' && <path d="M8 2v12 M2 8h12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />}
+    </svg>
+    <span>{labels[kind]}</span>
+  </p>
+  {title && <p class="note__title">{title}</p>}
+  <div class="note__body">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .note {
+    max-width: var(--measure);
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
+    font-size: 0.975em;
+    border-radius: 0 var(--r-figure) var(--r-figure) 0;
+  }
+
+  .note__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 650;
+  }
+
+  .note__title {
+    margin-top: var(--sp-2);
+    font-family: var(--font-sans);
+    font-weight: 640;
+    font-size: 1.05rem;
+    line-height: 1.35;
+  }
+
+  .note__body {
+    margin-top: var(--sp-2);
+  }
+
+  .note__body > :global(* + *) {
+    margin-top: var(--sp-3);
+  }
+
+  .note--hypothesis {
+    background: transparent;
+    border-left: 2px dashed var(--hypothesis);
+    color: var(--ink);
+  }
+
+  .note--hypothesis .note__label {
+    color: var(--hypothesis);
+  }
+
+  .note--limitation {
+    background: var(--inflammation-tint);
+    border-left: 3px solid var(--inflammation-ink);
+  }
+
+  .note--limitation .note__label {
+    color: var(--inflammation-ink);
+  }
+
+  .note--definition {
+    background: var(--paper-sunk);
+    border-left: 3px solid var(--air-ink);
+  }
+
+  .note--definition .note__label {
+    color: var(--air-ink);
+  }
+
+  .note--context {
+    background: var(--paper-raised);
+    border-left: 3px solid var(--rule-strong);
+  }
+
+  .note--context .note__label {
+    color: var(--ink-2);
+  }
+</style>

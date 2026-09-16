@@ -1,0 +1,239 @@
+---
+import ChapterLayout from '../layouts/ChapterLayout.astro';
+import Section from '../components/content/Section.astro';
+import Note from '../components/content/Note.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import Table from '../components/content/Table.astro';
+import StatusPill from '../components/content/StatusPill.astro';
+import ChartFrame from '../components/charts/ChartFrame.astro';
+import LineChart from '../components/charts/LineChart.astro';
+import ResponseHeatmap from '../components/charts/ResponseHeatmap.astro';
+import { doseResponse, images, patterns, specificity, datasets } from '../data/results';
+import { hypotheses } from '../data/experiments';
+import { modules, familyById } from '../data/signals';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'status', title: 'Status of results' },
+  { id: 'dose-response', title: 'Module dose–response' },
+  { id: 'specificity', title: 'Specificity across compounds' },
+  { id: 'patterns', title: 'Array patterns' },
+  { id: 'images', title: 'Images' },
+  { id: 'datasets', title: 'Raw data' },
+];
+
+const doseSeries = doseResponse.map((set) => ({
+  label: `${set.moduleId.toUpperCase()} to ${set.compound}`,
+  family: set.family,
+  points: set.points,
+}));
+const doseUnit = doseResponse[0]?.unit ?? 'concentration';
+---
+
+<ChapterLayout
+  slug="results"
+  toc={toc}
+  brief={[
+    'No experimental results have been produced yet. This page is built and empty, not padded.',
+    'Each figure below renders real data as soon as it is added to src/data/results.ts.',
+    'Results will be reported against the hypotheses in Experiments, including results that do not support them.',
+  ]}
+>
+  <Section id="status" title="Status of results">
+    <Note kind="limitation" title="Nothing here is measured yet">
+      <p>
+        We would rather show empty axes than a figure that looks like evidence and is not. Every chart on this page is a
+        working component waiting for its dataset, and the simulation on the home page is labelled as a simulation
+        wherever it appears.
+      </p>
+    </Note>
+
+    <Table label="Results expected for each hypothesis">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Hypothesis</th>
+            <th scope="col">Result that will appear here</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            hypotheses.map((h) => (
+              <tr>
+                <th scope="row">{h.id}</th>
+                <td>{h.prediction}</td>
+                <td>
+                  <StatusPill kind="planned" label="No data yet" />
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </Table>
+
+    <p>
+      The plan behind these measurements, including controls and replication, is in{' '}
+      <a href={href('experiments')}>Experiments</a>.
+    </p>
+  </Section>
+
+  <Section id="dose-response" title="Module dose–response">
+    <p>
+      For each module, the reporter signal measured across a concentration series of a defined compound, with error bars
+      across biological replicates.
+    </p>
+    <ChartFrame
+      title="Reporter response against compound concentration"
+      caption="One line per module. Error bars show variation across biological replicates. Signals are background-corrected and normalised to the positive control."
+      hasData={doseResponse.length > 0}
+      awaiting="Dose–response measurements for each module against its target compound, with at least three biological replicates."
+      where="src/data/results.ts"
+    >
+      {
+        doseResponse.length > 0 && (
+          <LineChart
+            series={doseSeries}
+            xLabel={`Concentration (${doseUnit})`}
+            yLabel="Normalised response"
+            xScaleType="log"
+          />
+        )
+      }
+    </ChartFrame>
+  </Section>
+
+  <Section id="specificity" title="Specificity across compounds">
+    <p>
+      The cross-reactivity panel: every module against every compound tested. This matrix is what decides whether the
+      array carries more information than a single module.
+    </p>
+    <ChartFrame
+      title="Response matrix, modules against compounds"
+      caption="Each cell is the normalised response of one module to one compound at a fixed concentration."
+      hasData={specificity !== null}
+      awaiting="A response value for every module and compound pair, measured at a fixed concentration on the same day."
+      where="src/data/results.ts"
+    >
+      {
+        specificity && (
+          <ResponseHeatmap
+            rowLabels={specificity.rows}
+            colLabels={specificity.cols}
+            values={specificity.values}
+            rowTitle="Modules"
+            colTitle="Compounds"
+          />
+        )
+      }
+    </ChartFrame>
+  </Section>
+
+  <Section id="patterns" title="Array patterns">
+    <p>
+      Whole-array responses to defined mixtures, shown as the response of each module in the same order used everywhere
+      on this site: {modules.map((m) => `${m.label} (${familyById(m.family).short})`).join(', ')}.
+    </p>
+    <ChartFrame
+      title="Response pattern per mixture"
+      caption="Mean response per module for each defined mixture, with replicates measured across different days and cell batches."
+      hasData={patterns.length > 0}
+      awaiting="Whole-array measurements for at least two mixtures, repeated across days and batches."
+      where="src/data/results.ts"
+    />
+  </Section>
+
+  <Section id="images" title="Images">
+    <p>Microscopy, plate photographs, gels and device images belong here, each with what it shows and when it was taken.</p>
+    {
+      images.length === 0 ? (
+        <Placeholder title="Images from the laboratory" kind="image" where="src/data/results.ts">
+          <ul>
+            <li>Upload files to static.igem.wiki, then reference the URL in the data file.</li>
+            <li>Give every image alt text that describes what it shows, not just its file name.</li>
+            <li>Say which experiment and date each image comes from.</li>
+          </ul>
+        </Placeholder>
+      ) : (
+        <ul class="gallery">
+          {images.map((image) => (
+            <li>
+              <img src={image.src} alt={image.alt} loading="lazy" decoding="async" />
+              <p>{image.caption}</p>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </Section>
+
+  <Section id="datasets" title="Raw data">
+    <p>
+      Anyone should be able to check our analysis against the numbers it came from, so raw files will be published here
+      with the code that reads them.
+    </p>
+    {
+      datasets.length === 0 ? (
+        <Placeholder title="Raw datasets" kind="data" where="src/data/results.ts">
+          <ul>
+            <li>One entry per dataset, with format and a link to the file.</li>
+            <li>Plate reader exports, with the plate layout needed to interpret them.</li>
+          </ul>
+        </Placeholder>
+      ) : (
+        <Table label="Datasets">
+          <table class="data">
+            <thead>
+              <tr>
+                <th scope="col">Dataset</th>
+                <th scope="col">What it contains</th>
+                <th scope="col">Format</th>
+                <th scope="col">File</th>
+              </tr>
+            </thead>
+            <tbody>
+              {datasets.map((dataset) => (
+                <tr>
+                  <th scope="row">{dataset.name}</th>
+                  <td>{dataset.description}</td>
+                  <td>{dataset.format}</td>
+                  <td>{dataset.file ? <a href={dataset.file}>Download</a> : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Table>
+      )
+    }
+  </Section>
+</ChapterLayout>
+
+<style>
+  .gallery {
+    display: grid;
+    gap: var(--sp-5);
+    margin: var(--sp-6) 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 46rem) {
+    .gallery {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .gallery img {
+    width: 100%;
+    border-radius: var(--r-figure);
+    border: 1px solid var(--rule);
+  }
+
+  .gallery p {
+    margin-top: var(--sp-3);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+</style>

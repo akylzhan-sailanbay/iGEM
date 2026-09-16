@@ -1,0 +1,115 @@
+/*
+ * OncoNose design tokens
+ *
+ * Two surfaces with distinct jobs:
+ *   paper      — the reading surface (a glass slide under daylight)
+ *   darkfield  — the instrument surface, used only for simulations and measured data
+ *
+ * Signal families are data encodings, never decoration. Green, amber and pink always mean
+ * tumour metabolism, oxidative stress and chronic inflammation respectively.
+ */
+:root {
+  color-scheme: light;
+
+  /* Reading surface */
+  --paper: #f4f2f7;
+  --paper-raised: #fbfafd;
+  --paper-sunk: #ebe8f1;
+  --ink: #221b44; /* hematoxylin */
+  --ink-2: #524b72;
+  --ink-3: #6a6488;
+  --rule: #dad5e6;
+  --rule-strong: #a9a2c2;
+
+  /* Instrument surface */
+  --darkfield: #15103a;
+  --darkfield-2: #211a4e;
+  --darkfield-line: #3b3370;
+  --on-dark: #eeebf7;
+  --on-dark-2: #b9b3d6;
+  --on-dark-3: #9892bc;
+
+  /* Signal families: base (fills), ink (text/lines on paper), glow (on darkfield) */
+  --metabolism: #16a870;
+  --metabolism-ink: #0a6e4a;
+  --metabolism-glow: #43e3a6;
+  --metabolism-tint: #d9f2e7;
+
+  --oxidative: #e4a41a;
+  --oxidative-ink: #7c5200;
+  --oxidative-glow: #ffcb5c;
+  --oxidative-tint: #f8ecce;
+
+  --inflammation: #e54a7f;
+  --inflammation-ink: #a61d4f;
+  --inflammation-glow: #ff7fa8;
+  --inflammation-tint: #f9dde7;
+
+  --air: #6fb7d8;
+  --air-ink: #185f7e;
+  --air-glow: #8ed8f2;
+
+  /* Evidence states */
+  --hypothesis: #524b72;
+  --placeholder-bg: #fff8e6;
+  --placeholder-edge: #c9a13b;
+  --placeholder-ink: #6b4a00;
+
+  --focus: #185f7e;
+
+  /* Type */
+  --font-sans: 'Mona Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Source Serif 4', ui-serif, Georgia, 'Times New Roman', serif;
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9063rem;
+  --text-base: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --text-lg: clamp(1.1875rem, 1.1rem + 0.4vw, 1.375rem);
+  --text-h3: clamp(1.1875rem, 1.12rem + 0.35vw, 1.375rem);
+  --text-h2: clamp(1.625rem, 1.35rem + 1.2vw, 2.25rem);
+  --text-h1: clamp(2.25rem, 1.6rem + 2.8vw, 3.75rem);
+  --text-display: clamp(4.25rem, 1rem + 15.5vw, 13.5rem);
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.3;
+  --leading-body: 1.62;
+
+  /* Space (4px base) */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --sp-9: 6rem;
+  --sp-10: 8rem;
+
+  /* Layout */
+  --page-max: 84rem;
+  --gutter: clamp(1rem, 3.5vw, 2.5rem);
+  --measure: 68ch;
+  --header-h: 4rem;
+
+  /* Radii encode hierarchy: devices are rounded, documents are nearly square */
+  --r-device: 1.75rem;
+  --r-figure: 0.75rem;
+  --r-control: 0.5rem;
+  --r-pill: 999px;
+
+  --shadow-float: 0 1px 0 rgb(34 27 68 / 0.05), 0 18px 40px -24px rgb(34 27 68 / 0.45);
+
+  /* Motion */
+  --ease-breath: cubic-bezier(0.45, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 140ms;
+  --dur-mid: 260ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-mid: 0ms;
+  }
+}

@@ -1,0 +1,193 @@
+---
+import ChapterLayout from '../layouts/ChapterLayout.astro';
+import Section from '../components/content/Section.astro';
+import Cite from '../components/content/Cite.astro';
+import Note from '../components/content/Note.astro';
+import Placeholder from '../components/content/Placeholder.astro';
+import Table from '../components/content/Table.astro';
+import ScreeningPathway from '../components/science/ScreeningPathway.astro';
+import HillExplorer from '../components/science/HillExplorer.astro';
+import { href } from '../lib/paths';
+
+const toc = [
+  { id: 'pipeline', title: 'The analysis pipeline' },
+  { id: 'normalisation', title: 'Turning signals into comparable numbers' },
+  { id: 'module-model', title: 'Modelling one module' },
+  { id: 'classification', title: 'Comparing whole patterns' },
+  { id: 'validation', title: 'How we would know the model is real' },
+];
+
+const refs = ['machado2005', 'nlst2011'];
+---
+
+<ChapterLayout
+  slug="model"
+  toc={toc}
+  refs={refs}
+  brief={[
+    'The analysis turns raw reporter signals into a comparable pattern, then compares patterns rather than single values.',
+    'With few samples, simple models and honest validation matter more than sophisticated ones.',
+    'A screening result depends on how common the disease is in the group tested, not only on the model.',
+  ]}
+>
+  <Section id="pipeline" title="The analysis pipeline">
+    <p>
+      Every step below either removes a known source of variation or makes samples comparable. Each is written down
+      before data exists, so that the analysis cannot be quietly tuned until it gives a pleasing answer.
+    </p>
+
+    <ScreeningPathway
+      label="Steps from a raw reporter reading to a screening suggestion"
+      steps={[
+        { title: 'Raw readings', detail: 'Reporter signal per module, per time point, straight from the reader.', needs: 'Plate layout and run metadata' },
+        { title: 'Background correction', detail: 'Subtract unexposed-module and room-air blanks measured in the same run.', needs: 'Controls on every plate' },
+        { title: 'Normalisation', detail: 'Express each module relative to its own positive control, so batches can be compared.', needs: 'A reference standard per run' },
+        { title: 'Feature vector', detail: 'One number per module, ordered the same way every time: the breath signature.', needs: 'A fixed module order' },
+        { title: 'Pattern comparison', detail: 'Compare with reference patterns using a model trained on separate data.', needs: 'Labelled training data' },
+        { title: 'Output', detail: 'A distance from reference and, in the concept, a suggestion to refer for clinical assessment.', needs: 'Agreed thresholds' },
+      ]}
+    />
+  </Section>
+
+  <Section id="normalisation" title="Turning signals into comparable numbers">
+    <p>
+      Cells differ between batches, readers drift, and a plate measured on Tuesday is not a plate measured on Friday.
+      Normalisation is what makes two measurements comparable at all.
+    </p>
+    <div class="equation">
+      <p class="equation__math">
+        r<sub>i</sub> = (s<sub>i</sub> − b<sub>i</sub>) / (p<sub>i</sub> − b<sub>i</sub>)
+      </p>
+      <p class="equation__key">
+        For module <em>i</em>: <strong>s</strong> is the measured signal, <strong>b</strong> the blank from unexposed
+        modules in the same run, and <strong>p</strong> the signal from the positive control. The result <strong>r</strong> is
+        a response on a common scale.
+      </p>
+    </div>
+    <Note kind="limitation" title="Normalisation cannot rescue a bad measurement">
+      <p>
+        If the blank and the sample were not measured in the same run, or the positive control saturated, no arithmetic
+        afterwards will fix it. This is why controls appear in every stage of the{' '}
+        <a href={href('experiments')}>experimental workflow</a>.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="module-model" title="Modelling one module">
+    <p>
+      Before the array can be modelled, each module needs a description of how its response changes with concentration.
+      A Hill function is the usual starting point: two parameters, both with a physical meaning, both fittable from a
+      dose–response curve.
+    </p>
+    <HillExplorer />
+    <p>
+      Fitted values of K and n tell us something practical: a module with a high K will not see breath-level
+      concentrations at all, and a module with a very high n behaves like a switch, which is poor for measuring amounts.
+    </p>
+  </Section>
+
+  <Section id="classification" title="Comparing whole patterns">
+    <p>
+      With a normalised vector per sample, the question becomes whether vectors from different groups separate. Two
+      complementary views are useful, and neither is a classifier on its own.
+    </p>
+    <Table label="Planned analysis methods">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Method</th>
+            <th scope="col">What it answers</th>
+            <th scope="col">Why it is appropriate here</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Distance from reference</th>
+            <td>How far this pattern sits from the reference pattern</td>
+            <td>Simple, interpretable, and what the home page simulation shows</td>
+          </tr>
+          <tr>
+            <th scope="row">Principal component analysis</th>
+            <td>Whether groups separate at all, in two dimensions we can look at</td>
+            <td>A visual check before any classifier, used in earlier breath studies<Cite id="machado2005" /></td>
+          </tr>
+          <tr>
+            <th scope="row">Simple supervised classifier</th>
+            <td>Whether a rule learned on one set of samples works on another</td>
+            <td>With few samples, a model with few parameters is less likely to fit noise</td>
+          </tr>
+        </tbody>
+      </table>
+    </Table>
+    <Note kind="limitation" title="Six modules, few samples">
+      <p>
+        With a small dataset it is easy to build a model that separates groups perfectly and means nothing. We plan to
+        report cross-validated performance, keep a test set that is never used for tuning, and repeat the analysis with
+        shuffled labels to show what chance performance looks like.
+      </p>
+    </Note>
+  </Section>
+
+  <Section id="validation" title="How we would know the model is real">
+    <p>
+      Screening performance is not one number. A test with high sensitivity can still produce mostly false alarms when
+      the condition is rare, which is exactly what CT screening trials found: 96.4% of positive low-dose CT screens in
+      the NLST were false positives.<Cite id="nlst2011" /> Any future claim about OncoNose would have to report the same
+      quantities, in a population where the prevalence is stated.
+    </p>
+    <Table label="Measures that would have to be reported">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Measure</th>
+            <th scope="col">Question it answers</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Sensitivity</th>
+            <td>Of people with the condition, how many does the test flag?</td>
+          </tr>
+          <tr>
+            <th scope="row">Specificity</th>
+            <td>Of people without it, how many does the test correctly leave alone?</td>
+          </tr>
+          <tr>
+            <th scope="row">Positive predictive value</th>
+            <td>Of people flagged, how many actually have the condition? This depends on how common it is.</td>
+          </tr>
+          <tr>
+            <th scope="row">Reproducibility</th>
+            <td>Does the same sample give the same answer on a different day, batch or device?</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </Table>
+  </Section>
+</ChapterLayout>
+
+<style>
+  .equation {
+    display: grid;
+    gap: var(--sp-3);
+    margin: var(--sp-5) 0;
+    padding: var(--sp-5);
+    border-left: 3px solid var(--ink);
+    background: var(--paper-sunk);
+  }
+
+  .equation__math {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-style: italic;
+    letter-spacing: 0.01em;
+  }
+
+  .equation__key {
+    max-width: 62ch;
+    font-size: var(--text-sm);
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+</style>

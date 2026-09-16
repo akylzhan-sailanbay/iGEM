@@ -1,0 +1,56 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  /** Optional short introduction rendered as a lede under the heading */
+  lead?: string;
+  class?: string;
+}
+const { id, title, lead, class: className } = Astro.props;
+---
+
+<section class:list={['section', className]} id={id} aria-labelledby={`${id}-title`}>
+  <h2 id={`${id}-title`} class="section__title">
+    <a class="section__anchor" href={`#${id}`}>
+      {title}
+      <span class="visually-hidden">(link to this section)</span>
+    </a>
+  </h2>
+  {lead && <p class="lede section__lead">{lead}</p>}
+  <div class="section__body prose">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    padding-bottom: var(--sp-9);
+  }
+
+  .section + :global(.section) {
+    padding-top: var(--sp-7);
+    border-top: 1px solid var(--rule);
+  }
+
+  .section__title {
+    max-width: 24ch;
+  }
+
+  .section__anchor {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .section__anchor:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  .section__lead {
+    margin-top: var(--sp-4);
+  }
+
+  .section__body {
+    margin-top: var(--sp-6);
+  }
+</style>
